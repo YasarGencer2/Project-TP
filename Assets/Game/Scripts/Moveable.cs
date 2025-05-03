@@ -1,47 +1,103 @@
+using Unity.Collections;
 using UnityEngine;
+using UnityEngine.AI;
 
-[RequireComponent(typeof(MoveableAnimator))]
+[RequireComponent(typeof(MoveableAnimator)), RequireComponent(typeof(Rigidbody))]
 public class Moveable : MonoBehaviour
 {
     [HideInInspector] public MoveableAnimator MoveableAnimator;
-    int activeDirection = 1;
-    bool run = false;
+    [HideInInspector] public Rigidbody Rb;
+
+    [Header("Movement")]
+    [SerializeField] float speed = 5f;
+    [SerializeField] float activeSpeed = 5f;
+    [SerializeField] float speedGainTime = 1;
+    [SerializeField] float speedLoseTime = .5f;
+
+    [Space(5), Header("Jump")]
+    [SerializeField] float jumpForce = 5f;
+
+    bool isMoving;
+    bool isGrounded;
+
+    Vector2 movementInput, lastMovementInput;
+    bool jumpInput;
     void Awake()
     {
         MoveableAnimator = GetComponent<MoveableAnimator>();
+        Rb = GetComponent<Rigidbody>();
     }
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        HandleMovement();
+    }
+    void HandleMovement()
+    {
+        MoveLogic();
+        JumpLogic();
+    }
+    void MoveLogic()
+    {
+        GetMoveInput();
+        HandleSpeed();
+        Move();
+    }
+    void JumpLogic()
+    {
+        SetIsGrounded();
+        GetJumpInput();
+        Jump();
+    }
+
+    #region Move
+    void GetMoveInput()
+    {
+        movementInput = InputManager.Instance.GetMovementInput();
+        isMoving = movementInput.magnitude > 0;
+        if (isMoving)
+            lastMovementInput = movementInput;
+    }
+    void HandleSpeed()
+    {
+        if (isMoving)
         {
-            run = true; 
+            activeSpeed += Time.deltaTime * (speed / speedGainTime);
         }
-        else if (Input.GetKeyUp(KeyCode.LeftShift))
+        else
         {
-            run = false; 
+            activeSpeed -= Time.deltaTime * (speed / speedLoseTime);
         }
-        if (Input.GetKey(KeyCode.D))
+        activeSpeed = Mathf.Clamp(activeSpeed, 0, speed);
+    }
+    void Move()
+    {
+        var vector = new Vector3(lastMovementInput.x, 0, lastMovementInput.y).normalized;
+        transform.position += vector * Time.deltaTime * activeSpeed;
+    }
+    #endregion
+    #region Jump
+    void SetIsGrounded()
+    {
+        RaycastHit[] hits = Physics.RaycastAll(transform.position, Vector3.down, 0.1f);
+        isGrounded = hits.Length > 1;
+        if (isGrounded == false && hits.Length > 0)
         {
-            MoveableAnimator.SetDirection(1);
-            var walkSpeed = run ? 2 : 1;
-            MoveableAnimator.SetSpeed(walkSpeed);
-            activeDirection = 1;
-        }
-        else if (Input.GetKey(KeyCode.A))
-        {
-            MoveableAnimator.SetDirection(-1);
-            var walkSpeed = run ? 2 : 1;
-            MoveableAnimator.SetSpeed(walkSpeed);
-            activeDirection = -1;
-        }
-        else if ((Input.GetKeyUp(KeyCode.D) && activeDirection == 1) || (Input.GetKeyUp(KeyCode.A) && activeDirection == -1))
-        {
-            MoveableAnimator.SetSpeed(0);
-            activeDirection = 0;
-        }
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            MoveableAnimator.SetJump();
+            var hit = hits[0];
+            isGrounded = hit.collider.gameObject != this;
         }
     }
+    void GetJumpInput()
+    {
+        jumpInput = InputManager.Instance.GetJumpInput();
+    }
+    void Jump()
+    {
+        if (isGrounded == false)
+            return;
+        if (jumpInput == false)
+            return;
+        Rb.linearVelocity = new Vector3(Rb.linearVelocity.x, 0, Rb.linearVelocity.z);
+        Rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+    }
+    #endregion
 }
