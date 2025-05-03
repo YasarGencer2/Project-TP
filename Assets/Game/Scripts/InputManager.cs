@@ -31,7 +31,7 @@ public class InputManager : MonoBehaviour
         return inputActions.FindAction("Player/Move").ReadValue<Vector2>();
     }
     public bool GetJumpInput()
-    {
-        return inputActions.FindAction("Player/Jump").triggered;
+    { 
+        return inputActions.FindAction("Player/Jump").ReadValue<float>() == 1;
     }
 }
