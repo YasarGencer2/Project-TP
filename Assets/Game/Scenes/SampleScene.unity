@@ -568,7 +568,7 @@ MonoBehaviour:
   Rb: {fileID: 0}
   speed: 5
   activeSpeed: 5
-  speedGainTime: 0.1
+  speedGainTime: 0.2
   speedLoseTime: 0.25
   isMoving: 0
   jumpForce: 10

@@ -64,8 +64,17 @@ public class Moveable : MonoBehaviour
     {
         movementInput = InputManager.Instance.GetMovementInput();
         isMoving = movementInput.magnitude > 0;
-        if (isMoving)
-            lastMovementInput = movementInput;
+        SetLastMovementInput();
+    }
+    void SetLastMovementInput()
+    {
+        if (isMoving == false)
+            return;
+        if (Vector2.Dot(lastMovementInput, movementInput) < 0)
+        {
+            activeSpeed = 0;
+        }
+        lastMovementInput = movementInput;
     }
     void HandleSpeed()
     {
@@ -127,7 +136,7 @@ public class Moveable : MonoBehaviour
     {
         if (isGrounded)
             return;
-        var force = jumpInput? gravityJumpForce: gravityFallForce;
+        var force = jumpInput ? gravityJumpForce : gravityFallForce;
         Rb.AddForce(Vector3.down * force * Time.deltaTime, ForceMode.Impulse);
     }
     #endregion
