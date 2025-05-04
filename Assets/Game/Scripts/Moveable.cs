@@ -17,6 +17,7 @@ public class Moveable : MonoBehaviour
     [SerializeField] float speedLoseTime = .5f;
     [SerializeField] bool isMoving;
     Vector2 movementInput, lastMovementInput;
+    int direction = 1;
 
 
     [Space(5), Header("Jump")]
@@ -41,7 +42,9 @@ public class Moveable : MonoBehaviour
     void Update()
     {
         HandleMovement();
+        HandleAnimations();
     }
+    #region MOVEMENT
     void HandleMovement()
     {
         MoveLogic();
@@ -51,9 +54,9 @@ public class Moveable : MonoBehaviour
     }
     void MoveLogic()
     {
-        GetMoveInput();
+        GetWalkInput();
         HandleSpeed();
-        Move();
+        Walk();
     }
     void JumpLogic()
     {
@@ -66,14 +69,14 @@ public class Moveable : MonoBehaviour
         UpdateGravity();
     }
 
-    #region Move
-    void GetMoveInput()
+    #region Walk
+    void GetWalkInput()
     {
         movementInput = InputManager.Instance.GetMovementInput();
         isMoving = movementInput.magnitude > 0;
-        SetLastMovementInput();
+        SetLastWalkInput();
     }
-    void SetLastMovementInput()
+    void SetLastWalkInput()
     {
         if (isMoving == false)
             return;
@@ -95,7 +98,7 @@ public class Moveable : MonoBehaviour
         }
         activeSpeed = Mathf.Clamp(activeSpeed, 0, speed);
     }
-    void Move()
+    void Walk()
     {
         var vector = new Vector3(lastMovementInput.x, 0, lastMovementInput.y).normalized;
         transform.position += vector * Time.deltaTime * activeSpeed;
@@ -106,7 +109,7 @@ public class Moveable : MonoBehaviour
     {
         if (canCheckGrounded == false)
             return;
-        RaycastHit[] hits = Physics.RaycastAll(transform.position, Vector3.down, 0.1f);
+        RaycastHit[] hits = Physics.RaycastAll(transform.position, Vector3.down, 0.05f);
         isGrounded = hits.Length > 1;
         if (isGrounded == false && hits.Length > 0)
         {
@@ -131,6 +134,7 @@ public class Moveable : MonoBehaviour
         isGrounded = false;
         canCheckGrounded = false;
         StartCoroutine(SetCanCheckGrounded(true));
+        MoveableAnimator.SetJump();
     }
     IEnumerator SetCanCheckGrounded(bool value)
     {
@@ -169,6 +173,40 @@ public class Moveable : MonoBehaviour
 
 
     #endregion
+    #endregion
 
+    #region ANIMATIONS
+    void HandleAnimations()
+    {
+        WalkAnimation();
+        JumpAnimation();
+    }
+    void WalkAnimation()
+    {
+        HandleAnimationWalkSpeed();
+        HandleAnimationWalkDirection();
+    }
+    void HandleAnimationWalkSpeed()
+    {
+        MoveableAnimator.SetSpeed(activeSpeed);
+    }
+    void HandleAnimationWalkDirection()
+    {
+        var lookDirection = transform.forward;
+        var moveDirection = new Vector3(lastMovementInput.x, 0, lastMovementInput.y).normalized;
+
+        if (moveDirection.magnitude > 0)
+        {
+            var dot = Vector3.Dot(lookDirection, moveDirection);
+            direction = dot >= 0 ? 1 : -1;
+        }
+
+        MoveableAnimator.SetDirection(direction);
+    }
+    void JumpAnimation()
+    {
+        if (isGrounded)
+            MoveableAnimator.SetLand();
+    }
     #endregion
 }

@@ -36,4 +36,14 @@ public class MoveableAnimator : MonoBehaviour
 
         _animator.SetTrigger("Jump");
     }
+    public void SetLand()
+    {
+        if (_animator == null)
+        {
+            Debug.LogWarning("Animator is not assigned.");
+            return;
+        }
+
+        _animator.SetTrigger("Land");
+    }
 }
