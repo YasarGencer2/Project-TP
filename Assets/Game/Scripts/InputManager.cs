@@ -5,6 +5,7 @@ public class InputManager : MonoBehaviour
 {
     public static InputManager Instance { get; private set; }
     [SerializeField] InputActionAsset inputActions;
+    [SerializeField] LayerMask playerLayerMask;
 
     private void Awake()
     {
@@ -31,18 +32,17 @@ public class InputManager : MonoBehaviour
         return inputActions.FindAction("Player/Move").ReadValue<Vector2>();
     }
     public bool GetJumpInput()
-    { 
+    {
         return inputActions.FindAction("Player/Jump").ReadValue<float>() == 1;
     }
-
     public Vector3 GetMousePosition()
     {
         var ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-        if (Physics.Raycast(ray, out RaycastHit hit))
+        if (Physics.Raycast(ray, out RaycastHit hit, 100, ~playerLayerMask))
         {
-            return hit.point;
+            return new Vector3(hit.point.x, 0, hit.point.z);
         }
-        var wordPos = ray.GetPoint(100);
-        return new Vector3(wordPos.x, 0, wordPos.z);
+        var worldPos = ray.GetPoint(100);
+        return new Vector3(worldPos.x, 0, worldPos.z);
     }
 }

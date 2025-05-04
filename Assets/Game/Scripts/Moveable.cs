@@ -150,23 +150,25 @@ public class Moveable : MonoBehaviour
     #region Rotation
     void RotationLogic()
     {
-        GetRotationInput(); 
+        GetRotationInput();
         Rotate();
     }
     void GetRotationInput()
     {
-        rotationInput = InputManager.Instance.GetMousePosition();
-        if (rotationInput.magnitude == 0)
-            return; 
+        var mousePos = InputManager.Instance.GetMousePosition();
+        rotationInput = (mousePos - transform.position);
+        rotationInput.y = 0;
     }
     void Rotate()
-{
-    var dir = new Vector3(rotationInput.x, 0, rotationInput.z);
-    if (dir == Vector3.zero) return;
-    var angle = Vector3.SignedAngle(transform.forward, dir.normalized, Vector3.up);
-    var rotation = Quaternion.Euler(0, angle, 0);
-    transform.rotation = Quaternion.Slerp(transform.rotation, transform.rotation * rotation, Time.deltaTime * rotationSpeed);
-}
+    {
+        if (rotationInput == Vector3.zero) return;
+        var angle = Vector3.SignedAngle(transform.forward, rotationInput.normalized, Vector3.up);
+        var rotation = Quaternion.Euler(0, angle, 0);
+        transform.rotation = Quaternion.Slerp(transform.rotation, transform.rotation * rotation, Time.deltaTime * rotationSpeed);
+    }
+
+
+    #endregion
 
     #endregion
 }
