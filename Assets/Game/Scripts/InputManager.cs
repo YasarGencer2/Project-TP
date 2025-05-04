@@ -34,4 +34,15 @@ public class InputManager : MonoBehaviour
     { 
         return inputActions.FindAction("Player/Jump").ReadValue<float>() == 1;
     }
+
+    public Vector3 GetMousePosition()
+    {
+        var ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            return hit.point;
+        }
+        var wordPos = ray.GetPoint(100);
+        return new Vector3(wordPos.x, 0, wordPos.z);
+    }
 }

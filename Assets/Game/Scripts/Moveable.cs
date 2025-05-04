@@ -2,6 +2,7 @@ using System.Collections;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 
 [RequireComponent(typeof(MoveableAnimator)), RequireComponent(typeof(Rigidbody))]
 public class Moveable : MonoBehaviour
@@ -27,6 +28,11 @@ public class Moveable : MonoBehaviour
     [SerializeField] float gravityJumpForce = 9.81f;
     [SerializeField] float gravityFallForce = 9.81f;
 
+    [Space(5), Header("Rotation")]
+    [SerializeField] float rotationSpeed = 5f;
+    [SerializeField] float rotationSmoothTime = 0.1f;
+    [SerializeField] Vector3 rotationInput;
+
     void Awake()
     {
         MoveableAnimator = GetComponent<MoveableAnimator>();
@@ -41,6 +47,7 @@ public class Moveable : MonoBehaviour
         MoveLogic();
         JumpLogic();
         GravityLogic();
+        RotationLogic();
     }
     void MoveLogic()
     {
@@ -139,5 +146,27 @@ public class Moveable : MonoBehaviour
         var force = jumpInput ? gravityJumpForce : gravityFallForce;
         Rb.AddForce(Vector3.down * force * Time.deltaTime, ForceMode.Impulse);
     }
+    #endregion
+    #region Rotation
+    void RotationLogic()
+    {
+        GetRotationInput(); 
+        Rotate();
+    }
+    void GetRotationInput()
+    {
+        rotationInput = InputManager.Instance.GetMousePosition();
+        if (rotationInput.magnitude == 0)
+            return; 
+    }
+    void Rotate()
+{
+    var dir = new Vector3(rotationInput.x, 0, rotationInput.z);
+    if (dir == Vector3.zero) return;
+    var angle = Vector3.SignedAngle(transform.forward, dir.normalized, Vector3.up);
+    var rotation = Quaternion.Euler(0, angle, 0);
+    transform.rotation = Quaternion.Slerp(transform.rotation, transform.rotation * rotation, Time.deltaTime * rotationSpeed);
+}
+
     #endregion
 }
