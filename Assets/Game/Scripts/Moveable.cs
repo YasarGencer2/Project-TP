@@ -134,13 +134,12 @@ public class Moveable : MonoBehaviour
         if (isGrounded == false && hits.Length > 0)
         {
             var hit = hits[0];
-            isGrounded = hit.collider.gameObject != this;
+            isGrounded = hit.collider.gameObject != this; 
         }
         if (isGrounded)
         {
             isJumping = false;
-            isDoubleJumping = false;
-            canCheckGrounded = false;
+            isDoubleJumping = false; 
         }
     }
     public void Jump()
