@@ -23,12 +23,6 @@ public class Moveable : MonoBehaviour
     [SerializeField] bool isGrounded, canCheckGrounded = true;
     [SerializeField] bool jumpInput;
 
-    [Space(5), Header("Dodge")]
-    [SerializeField] float dodgeForce = 5f;
-    [SerializeField] float dodgeCooldown = 0.5f;
-    [SerializeField] float dodgeTime = 0.5f;
-    [SerializeField] bool dodgeInput;
-    [SerializeField] bool canDodge = true;
 
     [Space(5), Header("Gravity")]
     [SerializeField] float gravityJumpForce = 9.81f;
@@ -41,8 +35,7 @@ public class Moveable : MonoBehaviour
 
     [Space(5), Header("Status")]
     [SerializeField] bool isWalking;
-    [SerializeField] bool isJumping;
-    [SerializeField] bool isDodging;
+    [SerializeField] bool isJumping; 
 
     [Space(5), Header("Debug")]
     [SerializeField] float lookAngle = 0f;
@@ -65,8 +58,7 @@ public class Moveable : MonoBehaviour
     void HandleMovement()
     {
         MoveLogic();
-        JumpLogic();
-        DodgeLogic();
+        JumpLogic(); 
         GravityLogic();
         RotationLogic();
     }
@@ -168,46 +160,7 @@ public class Moveable : MonoBehaviour
         canCheckGrounded = value;
     }
     #endregion
-    #region Dodge
-    void DodgeLogic()
-    {
-        GetDodgeInput();
-        Dodge();
-    }
-    void GetDodgeInput()
-    {
-        if (canDodge == false)
-            return;
-        dodgeInput = InputManager.Instance.GetDodgeInput();
-    }
-    void Dodge()
-    {
-        if (isGrounded == false)
-            return;
-        if (dodgeInput == false)
-            return;
-
-        isDodging = true;
-        canDodge = false;
-        dodgeInput = false;
-        StartCoroutine(SetDodgeStatus());
-        StartCoroutine(SetCanDodge(true));
-
-        var direction = new Vector3(lastMovementInput.x, 0, lastMovementInput.y);
-        Rb.AddForce(direction.normalized * dodgeForce, ForceMode.Impulse);
-        DodgeAnimation();
-    }
-    IEnumerator SetDodgeStatus()
-    {
-        yield return new WaitForSeconds(dodgeTime);
-        isDodging = false;
-    }
-    IEnumerator SetCanDodge(bool value)
-    {
-        yield return new WaitForSeconds(dodgeCooldown);
-        canDodge = value;
-    }
-    #endregion 
+     
     #region Gravity
     void UpdateGravity()
     {
@@ -226,6 +179,7 @@ public class Moveable : MonoBehaviour
     }
     void GetRotationInput()
     {
+        
         var mousePos = InputManager.Instance.GetMousePosition();
         rotateTo = (mousePos - transform.position);
         rotateTo.y = 0;
@@ -309,11 +263,7 @@ public class Moveable : MonoBehaviour
     void JumpAnimation()
     {
         MoveableAnimator.SetJump();
-    }
-    void DodgeAnimation()
-    {
-        MoveableAnimator.SetDodge(directionByRotation.ToString().ToCharArray()[0]);
-    }
+    } 
     #endregion
 }
 

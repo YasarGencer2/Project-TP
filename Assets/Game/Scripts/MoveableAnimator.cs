@@ -55,15 +55,5 @@ public class MoveableAnimator : MonoBehaviour
         }
 
         _animator.SetTrigger("Land");
-    }
-    public void SetDodge(char direction)
-    {
-        if (_animator == null)
-        {
-            Debug.LogWarning("Animator is not assigned.");
-            return;
-        }
-
-        _animator.SetTrigger("Dodge" + direction);
-    }
+    } 
 }
