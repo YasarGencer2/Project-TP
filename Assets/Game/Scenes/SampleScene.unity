@@ -1521,7 +1521,7 @@ MonoBehaviour:
   doubleJumpForce: 20
   canCheckGrounded: 1
   jumpInput: 0
-  wallJumpForce: 20
+  wallJumpForce: 10
   canCheckHangingOnWall: 1
   wallDirection: {x: 0, y: 0, z: 0}
   gravityJumpForce: 50
