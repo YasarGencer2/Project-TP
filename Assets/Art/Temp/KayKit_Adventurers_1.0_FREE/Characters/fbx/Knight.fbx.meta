@@ -469,7 +469,7 @@ ModelImporter:
       name: Dodge_Forward
       takeName: Dodge_Forward
       internalID: -3851722262833059593
-      firstFrame: 0
+      firstFrame: 2
       lastFrame: 12
       wrapMode: 0
       orientationOffsetY: 0
@@ -477,7 +477,7 @@ ModelImporter:
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 0
+      loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0
@@ -498,7 +498,7 @@ ModelImporter:
       name: Dodge_Backward
       takeName: Dodge_Backward
       internalID: 650242174318006946
-      firstFrame: 0
+      firstFrame: 2
       lastFrame: 12
       wrapMode: 0
       orientationOffsetY: 0
@@ -506,7 +506,7 @@ ModelImporter:
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 0
+      loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0
@@ -527,7 +527,7 @@ ModelImporter:
       name: Dodge_Right
       takeName: Dodge_Right
       internalID: 2188323905074769703
-      firstFrame: 0
+      firstFrame: 2
       lastFrame: 12
       wrapMode: 0
       orientationOffsetY: 0
@@ -535,7 +535,7 @@ ModelImporter:
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 0
+      loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0
@@ -556,7 +556,7 @@ ModelImporter:
       name: Dodge_Left
       takeName: Dodge_Left
       internalID: -8338831036711338807
-      firstFrame: 0
+      firstFrame: 2
       lastFrame: 12
       wrapMode: 0
       orientationOffsetY: 0
@@ -564,7 +564,7 @@ ModelImporter:
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 0
+      loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0

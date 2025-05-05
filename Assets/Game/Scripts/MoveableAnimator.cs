@@ -16,7 +16,7 @@ public class MoveableAnimator : MonoBehaviour
 
         _animator.SetFloat("Speed", speed);
     }
-    public void SetDirection(int direction)
+    public void SetDirectionForward(int directionForward)
     {
         if (_animator == null)
         {
@@ -24,7 +24,17 @@ public class MoveableAnimator : MonoBehaviour
             return;
         }
 
-        _animator.SetFloat("Direction", direction);
+        _animator.SetFloat("DirectionForward", directionForward);
+    }
+    public void SetDirectionSideways(int directionSideways)
+    {
+        if (_animator == null)
+        {
+            Debug.LogWarning("Animator is not assigned.");
+            return;
+        }
+
+        _animator.SetFloat("DirectionSideways", directionSideways);
     }
     public void SetJump()
     {
@@ -45,5 +55,15 @@ public class MoveableAnimator : MonoBehaviour
         }
 
         _animator.SetTrigger("Land");
+    }
+    public void SetDodge(char direction)
+    {
+        if (_animator == null)
+        {
+            Debug.LogWarning("Animator is not assigned.");
+            return;
+        }
+
+        _animator.SetTrigger("Dodge" + direction);
     }
 }

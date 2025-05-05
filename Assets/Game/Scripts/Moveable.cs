@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.AI;
@@ -17,13 +18,20 @@ public class Moveable : MonoBehaviour
     [SerializeField] float speedLoseTime = .5f;
     [SerializeField] bool isMoving;
     Vector2 movementInput, lastMovementInput;
-    int direction = 1;
+    int directionForward = 1;
+    int directionSideways = 0;
 
 
     [Space(5), Header("Jump")]
     [SerializeField] float jumpForce = 5f;
     [SerializeField] bool isGrounded, canCheckGrounded = true;
     [SerializeField] bool jumpInput;
+
+    [Space(5), Header("Dodge")]
+    [SerializeField] float dodgeForce = 5f;
+    [SerializeField] float dodgeCooldown = 0.5f;
+    [SerializeField] bool dodgeInput;
+    [SerializeField] bool canDodge = true;
 
     [Space(5), Header("Gravity")]
     [SerializeField] float gravityJumpForce = 9.81f;
@@ -32,7 +40,10 @@ public class Moveable : MonoBehaviour
     [Space(5), Header("Rotation")]
     [SerializeField] float rotationSpeed = 5f;
     [SerializeField] float rotationSmoothTime = 0.1f;
-    [SerializeField] Vector3 rotationInput;
+    [SerializeField] Vector3 rotateTo;
+    float lookAngle = 0f;
+
+    Directions directionByRotation;
 
     void Awake()
     {
@@ -49,6 +60,7 @@ public class Moveable : MonoBehaviour
     {
         MoveLogic();
         JumpLogic();
+        DodgeLogic();
         GravityLogic();
         RotationLogic();
     }
@@ -142,6 +154,38 @@ public class Moveable : MonoBehaviour
         canCheckGrounded = value;
     }
     #endregion
+    #region Dodge
+    void DodgeLogic()
+    {
+        GetDodgeInput();
+        Dodge();
+    }
+    void GetDodgeInput()
+    {
+        if (canDodge == false)
+            return;
+        dodgeInput = InputManager.Instance.GetDodgeInput();
+    }
+    void Dodge()
+    {
+        if (isGrounded == false)
+            return;
+        if (dodgeInput == false)
+            return;
+        print("dodging " + lastMovementInput);
+        var direction = new Vector3(lastMovementInput.x, 0, lastMovementInput.y);
+        Rb.AddForce(direction.normalized * dodgeForce, ForceMode.Impulse);
+        dodgeInput = false;
+        canDodge = false;
+        DodgeAnimation();
+        StartCoroutine(SetCanDodge(true));
+    }
+    IEnumerator SetCanDodge(bool value)
+    {
+        yield return new WaitForSeconds(dodgeCooldown);
+        canDodge = value;
+    }
+    #endregion 
     #region Gravity
     void UpdateGravity()
     {
@@ -156,22 +200,47 @@ public class Moveable : MonoBehaviour
     {
         GetRotationInput();
         Rotate();
+        SetDirectionByRotation();
     }
     void GetRotationInput()
     {
         var mousePos = InputManager.Instance.GetMousePosition();
-        rotationInput = (mousePos - transform.position);
-        rotationInput.y = 0;
+        rotateTo = (mousePos - transform.position);
+        rotateTo.y = 0;
     }
     void Rotate()
     {
-        if (rotationInput == Vector3.zero) return;
-        var angle = Vector3.SignedAngle(transform.forward, rotationInput.normalized, Vector3.up);
-        var rotation = Quaternion.Euler(0, angle, 0);
+        if (rotateTo == Vector3.zero) return;
+        lookAngle = Vector3.SignedAngle(transform.forward, rotateTo.normalized, Vector3.up);
+        var rotation = Quaternion.Euler(0, lookAngle, 0);
         transform.rotation = Quaternion.Slerp(transform.rotation, transform.rotation * rotation, Time.deltaTime * rotationSpeed);
     }
-
-
+    void SetDirectionByRotation()
+    {
+        var moveDirection = new Vector3(lastMovementInput.x, 0, lastMovementInput.y);
+        var lookDirection = transform.forward;
+        var direction = Vector3.Dot(moveDirection, lookDirection);
+        if (direction > 0.5f)
+        {
+            directionByRotation = Directions.Forward;
+        }
+        else if (direction < -0.5f)
+        {
+            directionByRotation = Directions.Backward;
+        }
+        else if (Vector3.Dot(moveDirection, transform.right) > 0.5f)
+        {
+            directionByRotation = Directions.Right;
+        }
+        else if (Vector3.Dot(moveDirection, -transform.right) > 0.5f)
+        {
+            directionByRotation = Directions.Left;
+        }
+        else
+        {
+            directionByRotation = Directions.Forward;
+        } 
+    }
     #endregion
     #endregion
 
@@ -192,21 +261,36 @@ public class Moveable : MonoBehaviour
     }
     void HandleAnimationWalkDirection()
     {
-        var lookDirection = transform.forward;
-        var moveDirection = new Vector3(lastMovementInput.x, 0, lastMovementInput.y).normalized;
+        var look = transform.forward;
+        var move = new Vector3(lastMovementInput.x, 0, lastMovementInput.y).normalized;
 
-        if (moveDirection.magnitude > 0)
+        if (move.magnitude > 0)
         {
-            var dot = Vector3.Dot(lookDirection, moveDirection);
-            direction = dot >= 0 ? 1 : -1;
+            var angle = Vector3.SignedAngle(look, move, Vector3.up);
+            directionForward = Mathf.Abs(angle) < 90 ? 1 : -1;
+            directionSideways = angle > 0 ? 1 : (angle < 0 ? -1 : 0);
         }
 
-        MoveableAnimator.SetDirection(direction);
+        MoveableAnimator.SetDirectionForward(directionForward);
+        MoveableAnimator.SetDirectionSideways(directionSideways);
     }
     void JumpAnimation()
     {
         if (isGrounded)
             MoveableAnimator.SetLand();
     }
+    void DodgeAnimation()
+    {
+        MoveableAnimator.SetDodge(directionByRotation.ToString().ToCharArray()[0]);
+    }
     #endregion
+}
+
+
+enum Directions
+{
+    Forward,
+    Backward,
+    Left,
+    Right
 }

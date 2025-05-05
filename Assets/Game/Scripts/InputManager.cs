@@ -35,6 +35,10 @@ public class InputManager : MonoBehaviour
     {
         return inputActions.FindAction("Player/Jump").ReadValue<float>() == 1;
     }
+    public bool GetDodgeInput()
+    {
+        return inputActions.FindAction("Player/Dodge").ReadValue<float>() == 1;
+    }
     public Vector3 GetMousePosition()
     {
         var ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());

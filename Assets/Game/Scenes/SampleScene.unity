@@ -179,7 +179,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 75.7
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -206,7 +206,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.2588191, y: 0, z: 0, w: 0.9659258}
-  m_LocalPosition: {x: 0, y: 10, z: -15}
+  m_LocalPosition: {x: 0, y: 15, z: -25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -828,7 +828,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MoveableAnimator: {fileID: 0}
   Rb: {fileID: 0}
-  speed: 5
+  speed: 10
   activeSpeed: 5
   speedGainTime: 0.2
   speedLoseTime: 0.25
@@ -837,11 +837,15 @@ MonoBehaviour:
   isGrounded: 0
   canCheckGrounded: 1
   jumpInput: 0
+  dodgeForce: 15
+  dodgeCooldown: 1
+  dodgeInput: 0
+  canDodge: 1
   gravityJumpForce: 10
   gravityFallForce: 30
   rotationSpeed: 25
   rotationSmoothTime: 0.1
-  rotationInput: {x: 0, y: 0, z: 0}
+  rotateTo: {x: 0, y: 0, z: 0}
 --- !u!114 &1193836998
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -887,7 +891,7 @@ Rigidbody:
   m_GameObject: {fileID: 1193836995}
   serializedVersion: 4
   m_Mass: 1
-  m_Drag: 0
+  m_Drag: 2
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -903,7 +907,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 122
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!1 &1315951555
 GameObject:
@@ -1007,8 +1011,8 @@ Transform:
   m_GameObject: {fileID: 1315951555}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.48, z: 3.72}
-  m_LocalScale: {x: 50, y: 1, z: 15}
+  m_LocalPosition: {x: 0, y: -0.48, z: -1.0154}
+  m_LocalScale: {x: 50, y: 1, z: 24.471}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1115,8 +1119,8 @@ Transform:
   m_GameObject: {fileID: 1465894637}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -13.1087, z: 3.72}
-  m_LocalScale: {x: 50, y: 24.474657, z: 15}
+  m_LocalPosition: {x: 0, y: -13.1087, z: -1.0154}
+  m_LocalScale: {x: 50, y: 24.474657, z: 24.471}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
