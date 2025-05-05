@@ -832,13 +832,13 @@ MonoBehaviour:
   activeSpeed: 5
   speedGainTime: 0.2
   speedLoseTime: 0.25
-  isMoving: 0
   jumpForce: 10
   isGrounded: 0
   canCheckGrounded: 1
   jumpInput: 0
   dodgeForce: 15
   dodgeCooldown: 1
+  dodgeTime: 0.2
   dodgeInput: 0
   canDodge: 1
   gravityJumpForce: 10
@@ -846,6 +846,15 @@ MonoBehaviour:
   rotationSpeed: 25
   rotationSmoothTime: 0.1
   rotateTo: {x: 0, y: 0, z: 0}
+  isWalking: 0
+  isJumping: 0
+  isDodging: 0
+  lookAngle: 0
+  directionForward: 1
+  directionSideways: 0
+  directionByRotation: 0
+  movementInput: {x: 0, y: 0}
+  lastMovementInput: {x: 0, y: 0}
 --- !u!114 &1193836998
 MonoBehaviour:
   m_ObjectHideFlags: 0

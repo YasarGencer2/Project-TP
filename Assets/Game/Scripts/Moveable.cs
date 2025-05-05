@@ -16,10 +16,6 @@ public class Moveable : MonoBehaviour
     [SerializeField] float activeSpeed = 5f;
     [SerializeField] float speedGainTime = 1;
     [SerializeField] float speedLoseTime = .5f;
-    [SerializeField] bool isMoving;
-    Vector2 movementInput, lastMovementInput;
-    int directionForward = 1;
-    int directionSideways = 0;
 
 
     [Space(5), Header("Jump")]
@@ -30,6 +26,7 @@ public class Moveable : MonoBehaviour
     [Space(5), Header("Dodge")]
     [SerializeField] float dodgeForce = 5f;
     [SerializeField] float dodgeCooldown = 0.5f;
+    [SerializeField] float dodgeTime = 0.5f;
     [SerializeField] bool dodgeInput;
     [SerializeField] bool canDodge = true;
 
@@ -41,9 +38,18 @@ public class Moveable : MonoBehaviour
     [SerializeField] float rotationSpeed = 5f;
     [SerializeField] float rotationSmoothTime = 0.1f;
     [SerializeField] Vector3 rotateTo;
-    float lookAngle = 0f;
 
-    Directions directionByRotation;
+    [Space(5), Header("Status")]
+    [SerializeField] bool isWalking;
+    [SerializeField] bool isJumping;
+    [SerializeField] bool isDodging;
+
+    [Space(5), Header("Debug")]
+    [SerializeField] float lookAngle = 0f;
+    [SerializeField] int directionForward = 1;
+    [SerializeField] int directionSideways = 0;
+    [SerializeField] Directions directionByRotation;
+    [SerializeField] Vector2 movementInput, lastMovementInput;
 
     void Awake()
     {
@@ -85,12 +91,12 @@ public class Moveable : MonoBehaviour
     void GetWalkInput()
     {
         movementInput = InputManager.Instance.GetMovementInput();
-        isMoving = movementInput.magnitude > 0;
+        isWalking = movementInput.magnitude > 0;
         SetLastWalkInput();
     }
     void SetLastWalkInput()
     {
-        if (isMoving == false)
+        if (isWalking == false)
             return;
         if (Vector2.Dot(lastMovementInput, movementInput) < 0)
         {
@@ -100,7 +106,7 @@ public class Moveable : MonoBehaviour
     }
     void HandleSpeed()
     {
-        if (isMoving)
+        if (isWalking)
         {
             activeSpeed += Time.deltaTime * (speed / speedGainTime);
         }
@@ -117,6 +123,12 @@ public class Moveable : MonoBehaviour
     }
     #endregion
     #region Jump
+    void GetJumpInput()
+    {
+        if (isGrounded == false && jumpInput == false)
+            return;
+        jumpInput = InputManager.Instance.GetJumpInput();
+    }
     void SetIsGrounded()
     {
         if (canCheckGrounded == false)
@@ -128,12 +140,11 @@ public class Moveable : MonoBehaviour
             var hit = hits[0];
             isGrounded = hit.collider.gameObject != this;
         }
-    }
-    void GetJumpInput()
-    {
-        if (isGrounded == false && jumpInput == false)
-            return;
-        jumpInput = InputManager.Instance.GetJumpInput();
+        if (isGrounded)
+        {
+            isJumping = false;
+            canCheckGrounded = false;
+        }
     }
     void Jump()
     {
@@ -141,12 +152,15 @@ public class Moveable : MonoBehaviour
             return;
         if (jumpInput == false)
             return;
+
+        isJumping = true;
+        isGrounded = false;
+        StartCoroutine(SetCanCheckGrounded(true));
+
         Rb.linearVelocity = new Vector3(Rb.linearVelocity.x, 0, Rb.linearVelocity.z);
         Rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-        isGrounded = false;
-        canCheckGrounded = false;
-        StartCoroutine(SetCanCheckGrounded(true));
-        MoveableAnimator.SetJump();
+
+        JumpAnimation();
     }
     IEnumerator SetCanCheckGrounded(bool value)
     {
@@ -172,13 +186,21 @@ public class Moveable : MonoBehaviour
             return;
         if (dodgeInput == false)
             return;
-        print("dodging " + lastMovementInput);
+
+        isDodging = true;
+        canDodge = false;
+        dodgeInput = false;
+        StartCoroutine(SetDodgeStatus());
+        StartCoroutine(SetCanDodge(true));
+
         var direction = new Vector3(lastMovementInput.x, 0, lastMovementInput.y);
         Rb.AddForce(direction.normalized * dodgeForce, ForceMode.Impulse);
-        dodgeInput = false;
-        canDodge = false;
         DodgeAnimation();
-        StartCoroutine(SetCanDodge(true));
+    }
+    IEnumerator SetDodgeStatus()
+    {
+        yield return new WaitForSeconds(dodgeTime);
+        isDodging = false;
     }
     IEnumerator SetCanDodge(bool value)
     {
@@ -210,10 +232,15 @@ public class Moveable : MonoBehaviour
     }
     void Rotate()
     {
-        if (rotateTo == Vector3.zero) return;
+        if (rotateTo == Vector3.zero)
+            return;
+
         lookAngle = Vector3.SignedAngle(transform.forward, rotateTo.normalized, Vector3.up);
-        var rotation = Quaternion.Euler(0, lookAngle, 0);
-        transform.rotation = Quaternion.Slerp(transform.rotation, transform.rotation * rotation, Time.deltaTime * rotationSpeed);
+        var a = transform.rotation;
+        var b = transform.rotation * Quaternion.Euler(0, lookAngle, 0);
+        var t = Time.deltaTime * rotationSpeed;
+
+        transform.rotation = Quaternion.Slerp(a, b, t);
     }
     void SetDirectionByRotation()
     {
@@ -239,7 +266,7 @@ public class Moveable : MonoBehaviour
         else
         {
             directionByRotation = Directions.Forward;
-        } 
+        }
     }
     #endregion
     #endregion
@@ -248,7 +275,7 @@ public class Moveable : MonoBehaviour
     void HandleAnimations()
     {
         WalkAnimation();
-        JumpAnimation();
+        LandAnimation();
     }
     void WalkAnimation()
     {
@@ -274,10 +301,14 @@ public class Moveable : MonoBehaviour
         MoveableAnimator.SetDirectionForward(directionForward);
         MoveableAnimator.SetDirectionSideways(directionSideways);
     }
-    void JumpAnimation()
+    void LandAnimation()
     {
         if (isGrounded)
             MoveableAnimator.SetLand();
+    }
+    void JumpAnimation()
+    {
+        MoveableAnimator.SetJump();
     }
     void DodgeAnimation()
     {
