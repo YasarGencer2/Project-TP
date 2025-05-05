@@ -18,13 +18,19 @@ public class Moveable : MonoBehaviour
     [Space(5), Header("Jump")]
     [SerializeField] float jumpForce = 5f;
     [SerializeField] float doubleJumpForce = 5f;
-    [SerializeField] bool isGrounded, canCheckGrounded = true;
+    [SerializeField] bool canCheckGrounded = true;
     public bool jumpInput = false;
+
+    [Space(2), Header("Wall Jump")]
+    [SerializeField] float wallJumpForce = 5f;
+    [SerializeField] bool canCheckHangingOnWall = true;
+    [SerializeField] Vector3 wallDirection = Vector3.zero;
 
 
     [Space(5), Header("Gravity")]
     [SerializeField] float gravityJumpForce = 9.81f;
     [SerializeField] float gravityFallForce = 9.81f;
+    [SerializeField] float gravityHangOnWallForce = 9.81f;
 
 
     [Space(5), Header("Rotation")]
@@ -36,6 +42,8 @@ public class Moveable : MonoBehaviour
     [SerializeField] bool isWalking;
     [SerializeField] bool isJumping;
     [SerializeField] bool isDoubleJumping;
+    [SerializeField] bool isGrounded;
+    [SerializeField] bool isHangingOnWall;
 
     [Space(5), Header("Debug")]
     [SerializeField] float lookAngle = 0f;
@@ -56,7 +64,7 @@ public class Moveable : MonoBehaviour
         HandleMovement();
     }
     void Update()
-    { 
+    {
         HandleAnimations();
     }
     #region MOVEMENT
@@ -76,6 +84,7 @@ public class Moveable : MonoBehaviour
     void JumpLogic()
     {
         SetIsGrounded();
+        SetIsHangingOnWall();
     }
     void GravityLogic()
     {
@@ -101,6 +110,11 @@ public class Moveable : MonoBehaviour
     }
     void HandleSpeed()
     {
+        if (isHangingOnWall)
+        {
+            activeSpeed = 0;
+            return;
+        }
         if (isWalking)
         {
             if (activeSpeed < minSpeed)
@@ -143,25 +157,41 @@ public class Moveable : MonoBehaviour
         {
             isJumping = false;
             isDoubleJumping = false;
+            isHangingOnWall = false;
+
         }
     }
     public void Jump()
     {
         jumpInput = true;
-        if (isDoubleJumping == true && isGrounded == false)
+        var canJump = isHangingOnWall || isGrounded || isDoubleJumping == false;
+        if (canJump == false)
             return;
-        if (isJumping == true)
-            isDoubleJumping = true;
+        if (isHangingOnWall)
+        {
+            WallJumpForce();
+        }
+        else
+        {
+            JumpFroce();
+            JumpAnimation();
+            if (isJumping == true)
+                isDoubleJumping = true;
+        }
+
         isJumping = true;
         isGrounded = false;
+        isHangingOnWall = false;
         canCheckGrounded = false;
+        canCheckHangingOnWall = false;
         StartCoroutine(SetCanCheckGrounded(true));
-
+        StartCoroutine(SetCanCheckHanginOnWall(true));
+    }
+    void JumpFroce()
+    {
         var force = isDoubleJumping ? doubleJumpForce : jumpForce;
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         rb.AddForce(Vector3.up * force, ForceMode.Impulse);
-
-        JumpAnimation();
     }
     public void CancelJump()
     {
@@ -172,6 +202,48 @@ public class Moveable : MonoBehaviour
         yield return new WaitForSeconds(0.05f);
         canCheckGrounded = value;
     }
+    #region Wall Jump
+    void SetIsHangingOnWall()
+    {
+        if (isGrounded || isJumping == false)
+        {
+            isHangingOnWall = false;
+            return;
+        }
+        if (canCheckHangingOnWall == false)
+            return;
+        RaycastHit hit;
+        Vector3[] directions = { transform.forward, transform.right, -transform.right, -transform.forward };
+
+        foreach (var direction in directions)
+        {
+            Debug.DrawRay(transform.position, direction * 0.75f, Color.red);
+            if (Physics.Raycast(transform.position, direction, out hit, 0.75f))
+            {
+                if (hit.collider != null && hit.collider.gameObject != this.gameObject)
+                {
+                    isHangingOnWall = true;
+                    isWalking = false;
+                    wallDirection = hit.normal;
+                    return;
+                }
+            }
+        }
+        isHangingOnWall = false;
+    }
+    void WallJumpForce()
+    {
+        var up = Vector3.up * jumpForce;
+        var forward = wallDirection * wallJumpForce;
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+        rb.AddForce(up + forward, ForceMode.Impulse);
+    }
+    IEnumerator SetCanCheckHanginOnWall(bool value)
+    {
+        yield return new WaitForSeconds(0.15f);
+        canCheckHangingOnWall = value;
+    }
+    #endregion
     #endregion
 
     #region Gravity
@@ -179,7 +251,9 @@ public class Moveable : MonoBehaviour
     {
         if (isGrounded)
             return;
-        var force = (jumpInput && rb.linearVelocity.y > 0) ? gravityJumpForce : gravityFallForce;
+        var force = isJumping ? gravityJumpForce : gravityFallForce;
+        if (isHangingOnWall)
+            force = gravityHangOnWallForce;
         rb.AddForce(Vector3.down * force * Time.deltaTime, ForceMode.Impulse);
     }
     #endregion

@@ -1510,8 +1510,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f470f9584ddd6422c96de335e55063e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MoveableAnimator: {fileID: 0}
-  Rb: {fileID: 0}
   activeSpeed: 0
   minSpeed: 2
   midSpeed: 5
@@ -1521,17 +1519,21 @@ MonoBehaviour:
   speedLoseTime: 0.25
   jumpForce: 25
   doubleJumpForce: 20
-  isGrounded: 0
   canCheckGrounded: 1
   jumpInput: 0
+  wallJumpForce: 20
+  canCheckHangingOnWall: 1
+  wallDirection: {x: 0, y: 0, z: 0}
   gravityJumpForce: 50
   gravityFallForce: 100
+  gravityHangOnWallForce: 0
   rotationSpeed: 25
   rotationSmoothTime: 0.1
-  lookTo: {x: 0, y: 0, z: 0}
   isWalking: 0
   isJumping: 0
   isDoubleJumping: 0
+  isGrounded: 0
+  isHangingOnWall: 0
   lookAngle: 0
   directionForward: 1
   directionSideways: 0
@@ -1540,6 +1542,8 @@ MonoBehaviour:
   lastMovementInput: {x: 0, y: 0}
   lookInput: {x: 0, y: 0}
   lastLookInput: {x: 0, y: 0}
+  lookTo: {x: 0, y: 0, z: 0}
+  lastLookTo: {x: 0, y: 0, z: 0}
 --- !u!114 &1193836998
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2492,7 +2496,7 @@ Transform:
   m_GameObject: {fileID: 1619328613}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -4.3, y: -6.7, z: 19.7}
+  m_LocalPosition: {x: -12.39, y: -6.7, z: 19.7}
   m_LocalScale: {x: 5, y: 1, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2575,7 +2579,7 @@ Transform:
   m_GameObject: {fileID: 1943152718}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -17.1, y: -6.7, z: 19.7}
+  m_LocalPosition: {x: -24.18, y: -6.7, z: 19.7}
   m_LocalScale: {x: 5, y: 1, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children:
