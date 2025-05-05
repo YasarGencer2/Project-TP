@@ -30,7 +30,6 @@ public class Moveable : MonoBehaviour
     [Space(5), Header("Rotation")]
     [SerializeField] float rotationSpeed = 5f;
     [SerializeField] float rotationSmoothTime = 0.1f;
-    [SerializeField] Vector3 lookTo;
 
 
     [Space(5), Header("Status")]
@@ -45,6 +44,7 @@ public class Moveable : MonoBehaviour
     [SerializeField] Directions directionByRotation;
     [SerializeField] Vector2 movementInput, lastMovementInput;
     [SerializeField] Vector2 lookInput, lastLookInput;
+    [SerializeField] Vector3 lookTo, lastLookTo;
 
     void Awake()
     {
@@ -201,7 +201,9 @@ public class Moveable : MonoBehaviour
     void GetRotationOnKeyboardAndMouse()
     {
         var mousePos = InputManager.Instance.GetMousePosition();
+        lastLookTo = lookTo;
         lookTo = mousePos - transform.position;
+        lookTo.Normalize();
         lookTo.y = 0;
     }
     void GetRotationOnGamepad()
@@ -216,7 +218,9 @@ public class Moveable : MonoBehaviour
             lookInput = lastLookInput;
         }
         lastLookInput = lookInput;
+        lastLookTo = lookTo;
         lookTo = new Vector3(lookInput.x, 0, lookInput.y);
+        lookTo.Normalize();
     }
     void Look()
     {
@@ -276,18 +280,12 @@ public class Moveable : MonoBehaviour
     }
     void HandleAnimationWalkDirection()
     {
-        var look = transform.forward;
-        var move = new Vector3(lastMovementInput.x, 0, lastMovementInput.y).normalized;
+        var movingDirection = new Vector3(lastMovementInput.x, 0, lastMovementInput.y);
+        var lookDirection = transform.forward;
 
-        if (move.magnitude > 0)
-        {
-            var angle = Vector3.SignedAngle(look, move, Vector3.up);
-            directionForward = Mathf.Abs(angle) < 90 ? 1 : -1;
-            directionSideways = angle > 0 ? 1 : (angle < 0 ? -1 : 0);
-        }
+        directionForward = Vector3.Dot(movingDirection.normalized, lookDirection) > 0.5f ? 1 : -1;
 
-        MoveableAnimator.SetDirectionForward(directionForward);
-        MoveableAnimator.SetDirectionSideways(directionSideways);
+        MoveableAnimator.SetDirectionForward(directionForward); 
     }
     void LandAnimation()
     {
