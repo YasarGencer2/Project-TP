@@ -1,10 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using Mono.Cecil.Cil;
-using Unity.Collections;
-using UnityEngine;
-using UnityEngine.AI;
-using UnityEngine.UIElements;
+using System.Collections; 
+using UnityEngine; 
 
 [RequireComponent(typeof(MoveableAnimator)), RequireComponent(typeof(Rigidbody))]
 public class Moveable : MonoBehaviour
@@ -13,10 +8,11 @@ public class Moveable : MonoBehaviour
     [HideInInspector] public Rigidbody Rb;
 
     [Header("Movement")]
-    [SerializeField] float speed = 5f;
     [SerializeField] float activeSpeed = 5f;
-    [SerializeField] float speedGainTime = 1;
+    [SerializeField] float minSpeed = 2f, midSpeed = 5f, maxSpeed = 10f;
+    [SerializeField] float speedGainTimeTillMid = 1, speedGainTimeTillMax = 1;
     [SerializeField] float speedLoseTime = .5f;
+    float lastMovingSpeed;
 
 
     [Space(5), Header("Jump")]
@@ -102,13 +98,23 @@ public class Moveable : MonoBehaviour
     {
         if (isWalking)
         {
-            activeSpeed += Time.deltaTime * (speed / speedGainTime);
+            if (activeSpeed < minSpeed)
+                activeSpeed = minSpeed;
+            if (activeSpeed < midSpeed)
+            {
+                activeSpeed += Time.deltaTime * (maxSpeed / speedGainTimeTillMid);
+            }
+            else if (activeSpeed < maxSpeed)
+            {
+                activeSpeed += Time.deltaTime * (maxSpeed / speedGainTimeTillMax);
+            }
+            lastMovingSpeed = activeSpeed;
         }
         else
         {
-            activeSpeed -= Time.deltaTime * (speed / speedLoseTime);
+            activeSpeed -= Time.deltaTime * (lastMovingSpeed / speedLoseTime);
         }
-        activeSpeed = Mathf.Clamp(activeSpeed, 0, speed);
+        activeSpeed = Mathf.Clamp(activeSpeed, 0, maxSpeed);
     }
     void Walk()
     {
@@ -202,7 +208,7 @@ public class Moveable : MonoBehaviour
         if (lookInput == Vector2.zero && movementInput != Vector2.zero)
         {
             lookInput = movementInput;
-        } 
+        }
         else if (lookInput == Vector2.zero && lastMovementInput == Vector2.zero)
         {
             lookInput = lastLookInput;
