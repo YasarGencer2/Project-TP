@@ -4,8 +4,8 @@ using UnityEngine;
 [RequireComponent(typeof(MoveableAnimator)), RequireComponent(typeof(Rigidbody))]
 public class Moveable : MonoBehaviour
 {
-    [HideInInspector] public MoveableAnimator MoveableAnimator;
-    [HideInInspector] public Rigidbody Rb;
+    [HideInInspector] MoveableAnimator moveableAnimator;
+    [HideInInspector] Rigidbody rb;
 
     [Header("Movement")]
     [SerializeField] float activeSpeed = 5f;
@@ -48,12 +48,15 @@ public class Moveable : MonoBehaviour
 
     void Awake()
     {
-        MoveableAnimator = GetComponent<MoveableAnimator>();
-        Rb = GetComponent<Rigidbody>();
+        moveableAnimator = GetComponent<MoveableAnimator>();
+        rb = GetComponent<Rigidbody>();
     }
-    void Update()
+    void FixedUpdate()
     {
         HandleMovement();
+    }
+    void Update()
+    { 
         HandleAnimations();
     }
     #region MOVEMENT
@@ -121,7 +124,7 @@ public class Moveable : MonoBehaviour
     void Walk()
     {
         var vector = new Vector3(lastMovementInput.x, 0, lastMovementInput.y).normalized;
-        transform.position += vector * Time.deltaTime * activeSpeed;
+        rb.MovePosition(rb.position + vector * Time.deltaTime * activeSpeed);
     }
     #endregion
     #region Jump 
@@ -155,8 +158,8 @@ public class Moveable : MonoBehaviour
         StartCoroutine(SetCanCheckGrounded(true));
 
         var force = isDoubleJumping ? doubleJumpForce : jumpForce;
-        Rb.linearVelocity = new Vector3(Rb.linearVelocity.x, 0, Rb.linearVelocity.z);
-        Rb.AddForce(Vector3.up * force, ForceMode.Impulse);
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+        rb.AddForce(Vector3.up * force, ForceMode.Impulse);
 
         JumpAnimation();
     }
@@ -176,8 +179,8 @@ public class Moveable : MonoBehaviour
     {
         if (isGrounded)
             return;
-        var force = (jumpInput && Rb.linearVelocity.y > 0) ? gravityJumpForce : gravityFallForce;
-        Rb.AddForce(Vector3.down * force * Time.deltaTime, ForceMode.Impulse);
+        var force = (jumpInput && rb.linearVelocity.y > 0) ? gravityJumpForce : gravityFallForce;
+        rb.AddForce(Vector3.down * force * Time.deltaTime, ForceMode.Impulse);
     }
     #endregion
     #region Look
@@ -276,7 +279,7 @@ public class Moveable : MonoBehaviour
     }
     void HandleAnimationWalkSpeed()
     {
-        MoveableAnimator.SetSpeed(activeSpeed);
+        moveableAnimator.SetSpeed(activeSpeed);
     }
     void HandleAnimationWalkDirection()
     {
@@ -285,16 +288,16 @@ public class Moveable : MonoBehaviour
 
         directionForward = Vector3.Dot(movingDirection.normalized, lookDirection) > 0.5f ? 1 : -1;
 
-        MoveableAnimator.SetDirectionForward(directionForward); 
+        moveableAnimator.SetDirectionForward(directionForward);
     }
     void LandAnimation()
     {
         if (isGrounded)
-            MoveableAnimator.SetLand();
+            moveableAnimator.SetLand();
     }
     void JumpAnimation()
     {
-        MoveableAnimator.SetJump();
+        moveableAnimator.SetJump();
     }
     #endregion
 }
