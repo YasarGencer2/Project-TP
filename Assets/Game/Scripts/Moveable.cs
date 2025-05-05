@@ -1,5 +1,5 @@
-using System.Collections; 
-using UnityEngine; 
+using System.Collections;
+using UnityEngine;
 
 [RequireComponent(typeof(MoveableAnimator)), RequireComponent(typeof(Rigidbody))]
 public class Moveable : MonoBehaviour
@@ -17,22 +17,26 @@ public class Moveable : MonoBehaviour
 
     [Space(5), Header("Jump")]
     [SerializeField] float jumpForce = 5f;
+    [SerializeField] float doubleJumpForce = 5f;
     [SerializeField] bool isGrounded, canCheckGrounded = true;
-    [SerializeField] bool jumpInput;
+    public bool jumpInput = false;
 
 
     [Space(5), Header("Gravity")]
     [SerializeField] float gravityJumpForce = 9.81f;
     [SerializeField] float gravityFallForce = 9.81f;
 
+
     [Space(5), Header("Rotation")]
     [SerializeField] float rotationSpeed = 5f;
     [SerializeField] float rotationSmoothTime = 0.1f;
     [SerializeField] Vector3 lookTo;
 
+
     [Space(5), Header("Status")]
     [SerializeField] bool isWalking;
     [SerializeField] bool isJumping;
+    [SerializeField] bool isDoubleJumping;
 
     [Space(5), Header("Debug")]
     [SerializeField] float lookAngle = 0f;
@@ -69,8 +73,6 @@ public class Moveable : MonoBehaviour
     void JumpLogic()
     {
         SetIsGrounded();
-        GetJumpInput();
-        Jump();
     }
     void GravityLogic()
     {
@@ -122,13 +124,7 @@ public class Moveable : MonoBehaviour
         transform.position += vector * Time.deltaTime * activeSpeed;
     }
     #endregion
-    #region Jump
-    void GetJumpInput()
-    {
-        if (isGrounded == false && jumpInput == false)
-            return;
-        jumpInput = InputManager.Instance.GetJumpInput();
-    }
+    #region Jump 
     void SetIsGrounded()
     {
         if (canCheckGrounded == false)
@@ -143,24 +139,30 @@ public class Moveable : MonoBehaviour
         if (isGrounded)
         {
             isJumping = false;
+            isDoubleJumping = false;
             canCheckGrounded = false;
         }
     }
-    void Jump()
+    public void Jump()
     {
-        if (isGrounded == false)
+        jumpInput = true;
+        if (isDoubleJumping == true && isGrounded == false)
             return;
-        if (jumpInput == false)
-            return;
-
+        if (isJumping == true)
+            isDoubleJumping = true;
         isJumping = true;
         isGrounded = false;
         StartCoroutine(SetCanCheckGrounded(true));
 
+        var force = isDoubleJumping ? doubleJumpForce : jumpForce;
         Rb.linearVelocity = new Vector3(Rb.linearVelocity.x, 0, Rb.linearVelocity.z);
-        Rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        Rb.AddForce(Vector3.up * force, ForceMode.Impulse);
 
         JumpAnimation();
+    }
+    public void CancelJump()
+    {
+        jumpInput = false;
     }
     IEnumerator SetCanCheckGrounded(bool value)
     {
@@ -174,7 +176,7 @@ public class Moveable : MonoBehaviour
     {
         if (isGrounded)
             return;
-        var force = jumpInput ? gravityJumpForce : gravityFallForce;
+        var force = (jumpInput && Rb.linearVelocity.y > 0) ? gravityJumpForce : gravityFallForce;
         Rb.AddForce(Vector3.down * force * Time.deltaTime, ForceMode.Impulse);
     }
     #endregion

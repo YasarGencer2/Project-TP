@@ -6,14 +6,14 @@ public class InputManager : MonoBehaviour
 {
     public static InputManager Instance { get; private set; }
     [SerializeField] InputActionAsset inputActions;
+    [SerializeField] Moveable player;
     [SerializeField] LayerMask playerLayerMask;
 
     [SerializeField] bool onGamepad;
     public bool OnGamepad => onGamepad;
 
 
-    Action<InputAction.CallbackContext> gamepadCallback;
-    Action<InputAction.CallbackContext> keyboardCallback;
+    Action<InputAction.CallbackContext> callBacks;
 
     private void Awake()
     {
@@ -44,19 +44,15 @@ public class InputManager : MonoBehaviour
     {
         inputActions.Enable();
 
-        // gamepadCallback = ctx => SetInputMode(true);
-        // keyboardCallback = ctx => SetInputMode(false);
-
-        // inputActions.FindAction("Player/GamepadPress").performed += gamepadCallback;
-        // inputActions.FindAction("Player/KeyboardPress").performed += keyboardCallback;
+        inputActions.FindAction("Player/Jump").performed += callBacks => JumpPerformed();
+        inputActions.FindAction("Player/Jump").canceled += callBacks => JumpCanceled();
     }
 
     private void OnDisable()
     {
         inputActions.Disable();
-
-        // inputActions.FindAction("Player/GamepadPress").performed -= gamepadCallback;
-        // inputActions.FindAction("Player/KeyboardPress").performed -= keyboardCallback;
+        inputActions.FindAction("Player/Jump").performed -= callBacks => JumpPerformed();
+        inputActions.FindAction("Player/Jump").canceled -= callBacks => JumpCanceled();
     }
 
     public Vector2 GetMovementInput()
@@ -69,14 +65,19 @@ public class InputManager : MonoBehaviour
         return value;
     }
 
-    public bool GetJumpInput()
+    void JumpPerformed()
     {
         var jumpAction = inputActions.FindAction("Player/Jump");
         var value = jumpAction.ReadValue<float>();
-        if (value == 0) return false;
+        if (value == 0)
+            return;
         var device = jumpAction.activeControl?.device;
         SetInputMode(device);
-        return inputActions.FindAction("Player/Jump").ReadValue<float>() == 1;
+        player.Jump();
+    }
+    void JumpCanceled()
+    { 
+        player.CancelJump();
     }
     public Vector3 GetMousePosition()
     {

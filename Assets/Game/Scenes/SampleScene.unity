@@ -1486,6 +1486,7 @@ MonoBehaviour:
   speedGainTimeTillMax: 1
   speedLoseTime: 0.25
   jumpForce: 25
+  doubleJumpForce: 20
   isGrounded: 0
   canCheckGrounded: 1
   jumpInput: 0
@@ -1496,6 +1497,7 @@ MonoBehaviour:
   lookTo: {x: 0, y: 0, z: 0}
   isWalking: 0
   isJumping: 0
+  isDoubleJumping: 0
   lookAngle: 0
   directionForward: 1
   directionSideways: 0
@@ -2509,6 +2511,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inputActions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  player: {fileID: 1193836997}
   playerLayerMask:
     serializedVersion: 2
     m_Bits: 8
