@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Mono.Cecil.Cil;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.AI;
@@ -31,11 +32,11 @@ public class Moveable : MonoBehaviour
     [Space(5), Header("Rotation")]
     [SerializeField] float rotationSpeed = 5f;
     [SerializeField] float rotationSmoothTime = 0.1f;
-    [SerializeField] Vector3 rotateTo;
+    [SerializeField] Vector3 lookTo;
 
     [Space(5), Header("Status")]
     [SerializeField] bool isWalking;
-    [SerializeField] bool isJumping; 
+    [SerializeField] bool isJumping;
 
     [Space(5), Header("Debug")]
     [SerializeField] float lookAngle = 0f;
@@ -43,6 +44,7 @@ public class Moveable : MonoBehaviour
     [SerializeField] int directionSideways = 0;
     [SerializeField] Directions directionByRotation;
     [SerializeField] Vector2 movementInput, lastMovementInput;
+    [SerializeField] Vector2 lookInput, lastLookInput;
 
     void Awake()
     {
@@ -58,9 +60,9 @@ public class Moveable : MonoBehaviour
     void HandleMovement()
     {
         MoveLogic();
-        JumpLogic(); 
+        JumpLogic();
         GravityLogic();
-        RotationLogic();
+        LookLogic();
     }
     void MoveLogic()
     {
@@ -160,7 +162,7 @@ public class Moveable : MonoBehaviour
         canCheckGrounded = value;
     }
     #endregion
-     
+
     #region Gravity
     void UpdateGravity()
     {
@@ -170,33 +172,57 @@ public class Moveable : MonoBehaviour
         Rb.AddForce(Vector3.down * force * Time.deltaTime, ForceMode.Impulse);
     }
     #endregion
-    #region Rotation
-    void RotationLogic()
+    #region Look
+    void LookLogic()
     {
-        GetRotationInput();
-        Rotate();
-        SetDirectionByRotation();
+        GetLookInput();
+        Look();
+        SetDirectionByLookDirection();
     }
-    void GetRotationInput()
+    void GetLookInput()
     {
-        
+        if (InputManager.Instance.OnGamepad)
+        {
+            GetRotationOnGamepad();
+        }
+        else
+        {
+            GetRotationOnKeyboardAndMouse();
+        }
+    }
+    void GetRotationOnKeyboardAndMouse()
+    {
         var mousePos = InputManager.Instance.GetMousePosition();
-        rotateTo = (mousePos - transform.position);
-        rotateTo.y = 0;
+        lookTo = mousePos - transform.position;
+        lookTo.y = 0;
     }
-    void Rotate()
+    void GetRotationOnGamepad()
     {
-        if (rotateTo == Vector3.zero)
+        lookInput = InputManager.Instance.GetLookInput();
+        if (lookInput == Vector2.zero && movementInput != Vector2.zero)
+        {
+            lookInput = movementInput;
+        } 
+        else if (lookInput == Vector2.zero && lastMovementInput == Vector2.zero)
+        {
+            lookInput = lastLookInput;
+        }
+        lastLookInput = lookInput;
+        lookTo = new Vector3(lookInput.x, 0, lookInput.y);
+    }
+    void Look()
+    {
+        if (lookTo == Vector3.zero)
             return;
 
-        lookAngle = Vector3.SignedAngle(transform.forward, rotateTo.normalized, Vector3.up);
+        lookAngle = Vector3.SignedAngle(transform.forward, lookTo.normalized, Vector3.up);
         var a = transform.rotation;
         var b = transform.rotation * Quaternion.Euler(0, lookAngle, 0);
         var t = Time.deltaTime * rotationSpeed;
 
         transform.rotation = Quaternion.Slerp(a, b, t);
     }
-    void SetDirectionByRotation()
+    void SetDirectionByLookDirection()
     {
         var moveDirection = new Vector3(lastMovementInput.x, 0, lastMovementInput.y);
         var lookDirection = transform.forward;
@@ -263,7 +289,7 @@ public class Moveable : MonoBehaviour
     void JumpAnimation()
     {
         MoveableAnimator.SetJump();
-    } 
+    }
     #endregion
 }
 
