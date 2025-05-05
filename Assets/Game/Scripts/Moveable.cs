@@ -134,12 +134,12 @@ public class Moveable : MonoBehaviour
         if (isGrounded == false && hits.Length > 0)
         {
             var hit = hits[0];
-            isGrounded = hit.collider.gameObject != this; 
+            isGrounded = hit.collider.gameObject != this;
         }
         if (isGrounded)
         {
             isJumping = false;
-            isDoubleJumping = false; 
+            isDoubleJumping = false;
         }
     }
     public void Jump()
@@ -151,6 +151,7 @@ public class Moveable : MonoBehaviour
             isDoubleJumping = true;
         isJumping = true;
         isGrounded = false;
+        canCheckGrounded = false;
         StartCoroutine(SetCanCheckGrounded(true));
 
         var force = isDoubleJumping ? doubleJumpForce : jumpForce;
