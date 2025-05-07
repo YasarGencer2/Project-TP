@@ -21,6 +21,7 @@ public class Moveable : MonoBehaviour
     [SerializeField] float jumpForce = 5f;
     [SerializeField] float doubleJumpForce = 5f;
     [SerializeField] bool canCheckGrounded = true;
+    [SerializeField] bool holdingJump = false;
     public bool jumpInput = false;
 
     [Space(2), Header("Wall Jump")]
@@ -195,7 +196,8 @@ public class Moveable : MonoBehaviour
     public void Jump()
     {
         jumpInput = true;
-        var canJump = isHangingOnWall || isGrounded || isDoubleJumping == false;
+        holdingJump = true;
+        var canJump = isHangingOnWall || (isGrounded = false || isDoubleJumping == false);
         if (canJump == false)
             return;
         if (isHangingOnWall)
@@ -229,7 +231,7 @@ public class Moveable : MonoBehaviour
     public void CancelJump()
     {
         if (jumpInput == true)
-            isJumping = false;
+            holdingJump = false;
         jumpInput = false;
     }
     IEnumerator SetCanCheckGrounded(bool value)
@@ -312,7 +314,7 @@ public class Moveable : MonoBehaviour
     {
         if (isGrounded)
             return;
-        gravity = isJumping ? gravityJumpForce : gravityFallForce;
+        gravity = holdingJump ? gravityJumpForce : gravityFallForce;
         if (isHangingOnWall)
             gravity = wallGravityStartTimeCounter <= 0 ? gravityHangOnWallForce : 0;
         rb.AddForce(Vector3.down * gravity * Time.fixedDeltaTime, ForceMode.Impulse);
