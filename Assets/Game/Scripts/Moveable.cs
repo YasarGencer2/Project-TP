@@ -225,6 +225,8 @@ public class Moveable : MonoBehaviour
                     isHangingOnWall = true;
                     isWalking = false;
                     wallDirection = hit.normal;
+                    rb.linearVelocity = Vector3.zero;
+
                     return;
                 }
             }
@@ -266,6 +268,11 @@ public class Moveable : MonoBehaviour
     }
     void GetLookInput()
     {
+        if (isHangingOnWall)
+        {
+            GetRotationOnWall();
+            return;
+        }
         if (InputManager.Instance.OnGamepad)
         {
             GetRotationOnGamepad();
@@ -298,6 +305,15 @@ public class Moveable : MonoBehaviour
         lastLookTo = lookTo;
         lookTo = new Vector3(lookInput.x, 0, lookInput.y);
         lookTo.Normalize();
+    }
+    void GetRotationOnWall()
+    { 
+        // this face along
+        // lastLookTo = lookTo;
+        // lookTo = Vector3.Cross(-wallDirection, Vector3.up).normalized;
+
+        lastLookTo = lookTo;
+        lookTo = wallDirection.normalized;
     }
     void Look()
     {
