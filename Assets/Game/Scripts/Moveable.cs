@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 
 [RequireComponent(typeof(MoveableAnimator)), RequireComponent(typeof(Rigidbody))]
@@ -23,9 +24,12 @@ public class Moveable : MonoBehaviour
     public bool jumpInput = false;
 
     [Space(2), Header("Wall Jump")]
-    [SerializeField] float wallJumpForce = 5f;
+    [SerializeField] float wallJumpForceUp = 5f;
+    [SerializeField] float wallJumpForceSide = 5f;
     [SerializeField] float wallJumpTime = 0.25f;
     [SerializeField] bool canCheckHangingOnWall = true;
+    [SerializeField] float wallGravityStartTime = 0.25f;
+    [SerializeField] float wallGravityStartTimeCounter = 0f;
     [SerializeField] Vector3 wallDirection = Vector3.zero;
     Coroutine wallJumpCoroutine, canCheckHangingOnWallCoroutine;
 
@@ -83,6 +87,7 @@ public class Moveable : MonoBehaviour
     {
         MoveLogic();
         JumpLogic();
+        WallLogic();
         GravityLogic();
         LookLogic();
         MovementHelpers();
@@ -96,7 +101,11 @@ public class Moveable : MonoBehaviour
     void JumpLogic()
     {
         SetIsGrounded();
+    }
+    void WallLogic()
+    {
         SetIsHangingOnWall();
+        CountWallGravity();
     }
     void GravityLogic()
     {
@@ -130,12 +139,7 @@ public class Moveable : MonoBehaviour
         lastMovementInput = movementInput;
     }
     void HandleSpeed()
-    {
-        if (isHangingOnWall || isWallJumping)
-        {
-            activeSpeed = 0;
-            return;
-        }
+    { 
         if (isWalking)
         {
             if (activeSpeed < minSpeed)
@@ -224,7 +228,14 @@ public class Moveable : MonoBehaviour
         yield return new WaitForSeconds(0.05f);
         canCheckGrounded = value;
     }
-    #region Wall Jump
+    #region Wall
+    void CountWallGravity()
+    {
+        if (isHangingOnWall)
+        {
+            wallGravityStartTimeCounter -= Time.deltaTime;
+        }
+    }
     void SetIsHangingOnWall()
     {
         if (isGrounded || isJumping == false)
@@ -240,11 +251,15 @@ public class Moveable : MonoBehaviour
             RaycastHelper.Raycast(out RaycastHit hit, transform, wallJumpRayData);
             if (hit.collider != null && hit.collider.gameObject != this.gameObject)
             {
-                isHangingOnWall = true;
-                isWalking = false;
-                isDoubleJumping = true;
+                if (isHangingOnWall == false)
+                {
+                    wallGravityStartTimeCounter = wallGravityStartTime;
+                    isWalking = false;
+                    isDoubleJumping = false;
+                    rb.linearVelocity = Vector3.zero;
+                }
                 wallDirection = hit.normal;
-                rb.linearVelocity = Vector3.zero;
+                isHangingOnWall = true;
                 return;
             }
         }
@@ -252,8 +267,8 @@ public class Moveable : MonoBehaviour
     }
     void WallJumpForce()
     {
-        var up = Vector3.up * jumpForce;
-        var forward = wallDirection * wallJumpForce;
+        var up = Vector3.up * wallJumpForceUp;
+        var forward = wallDirection * wallJumpForceSide;
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         rb.AddForce(up + forward, ForceMode.Impulse);
         isWallJumping = true;
@@ -281,7 +296,7 @@ public class Moveable : MonoBehaviour
             return;
         var force = isJumping ? gravityJumpForce : gravityFallForce;
         if (isHangingOnWall)
-            force = gravityHangOnWallForce;
+            force = wallGravityStartTimeCounter <= 0 ? gravityHangOnWallForce : 0;
         rb.AddForce(Vector3.down * force * Time.deltaTime, ForceMode.Impulse);
     }
     #endregion
