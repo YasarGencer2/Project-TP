@@ -27,7 +27,7 @@ public class Moveable : MonoBehaviour
     [SerializeField] float wallJumpTime = 0.25f;
     [SerializeField] bool canCheckHangingOnWall = true;
     [SerializeField] Vector3 wallDirection = Vector3.zero;
-    Coroutine wallJumpCoroutine;
+    Coroutine wallJumpCoroutine, canCheckHangingOnWallCoroutine;
 
 
     [Space(5), Header("Gravity")]
@@ -50,7 +50,7 @@ public class Moveable : MonoBehaviour
     [SerializeField] bool isWallJumping;
 
     [Space(10), Header("Debug")]
-    [Space(5), Header("Ray Datas")]
+    [Space(0), Header("Ray Datas")]
     [SerializeField] RayData isGroundedRayData;
     [SerializeField] RayData wallJumpRayData;
     [SerializeField] RayData wallJumpGroundRayData;
@@ -205,7 +205,9 @@ public class Moveable : MonoBehaviour
         canCheckGrounded = false;
         canCheckHangingOnWall = false;
         StartCoroutine(SetCanCheckGrounded(true));
-        StartCoroutine(SetCanCheckHanginOnWall(true));
+        if (canCheckHangingOnWallCoroutine != null)
+            StopCoroutine(canCheckHangingOnWallCoroutine);
+        canCheckHangingOnWallCoroutine = StartCoroutine(SetCanCheckHanginOnWall(true));
     }
     void JumpFroce()
     {
@@ -353,11 +355,14 @@ public class Moveable : MonoBehaviour
             return;
         if (isGrounded)
             return;
+        if (rb.linearVelocity.y < 0)
+            return;
         RaycastHelper.Raycast(out RaycastHit hitTop, transform, ledgeTopRayData);
         RaycastHelper.Raycast(out RaycastHit hitBottom, transform, ledgeBottomRayData);
-        if (hitTop.collider == null || hitBottom.collider != null)
+        if (hitTop.collider == null && hitBottom.collider != null)
         {
-            rb.MovePosition(rb.position + Vector3.up * Time.deltaTime * (ledgeTopRayData.OriginOffset.y - ledgeBottomRayData.OriginOffset.y));
+            print("Ledge");
+            rb.MovePosition(rb.position + transform.up * (ledgeTopRayData.OriginOffset.y - ledgeBottomRayData.OriginOffset.y));
         }
     }
 

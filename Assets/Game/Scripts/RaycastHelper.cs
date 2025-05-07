@@ -89,6 +89,30 @@ public class RaycastHelper : MonoBehaviour
             case Directions.Down:
                 directionVector = -transform.up;
                 break;
+            case Directions.ForwardLeft:
+                directionVector = (transform.forward - transform.right).normalized;
+                break;
+            case Directions.ForwardRight:
+                directionVector = (transform.forward + transform.right).normalized;
+                break;
+            case Directions.BackwardLeft:
+                directionVector = (-transform.forward - transform.right).normalized;
+                break;
+            case Directions.BackwardRight:
+                directionVector = (-transform.forward + transform.right).normalized;
+                break;
+            case Directions.UpLeft:
+                directionVector = (transform.up - transform.right).normalized;
+                break;
+            case Directions.UpRight:
+                directionVector = (transform.up + transform.right).normalized;
+                break;
+            case Directions.DownLeft:
+                directionVector = (-transform.up - transform.right).normalized;
+                break;
+            case Directions.DownRight:
+                directionVector = (-transform.up + transform.right).normalized;
+                break;
         }
         return directionVector;
     }
@@ -111,5 +135,13 @@ public enum Directions
     Left,
     Right,
     Up,
-    Down
+    Down,
+    ForwardLeft,
+    ForwardRight,
+    BackwardLeft,
+    BackwardRight,
+    UpLeft,
+    UpRight,
+    DownLeft,
+    DownRight
 }

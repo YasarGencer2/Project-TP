@@ -1936,9 +1936,9 @@ MonoBehaviour:
       serializedVersion: 2
       m_Bits: 4294967295
   wallJumpRayData:
-    Directions: 00000000010000000200000003000000
+    Directions: 0000000001000000020000000300000006000000070000000800000009000000
     OriginOffset: {x: 0, y: 2, z: 0}
-    Distance: 0.82
+    Distance: 0.8
     DrawThick: 0
     Color: {r: 1, g: 0, b: 0, a: 1}
     Mask:
@@ -1955,7 +1955,7 @@ MonoBehaviour:
       m_Bits: 55
   ledgeBottomRayData:
     Directions: 00000000
-    OriginOffset: {x: 0, y: 0.42, z: 0}
+    OriginOffset: {x: 0, y: 0.34, z: 0}
     Distance: 0.6
     DrawThick: 0
     Color: {r: 0, g: 1, b: 0.06282711, a: 1}
@@ -1964,7 +1964,7 @@ MonoBehaviour:
       m_Bits: 55
   ledgeTopRayData:
     Directions: 00000000
-    OriginOffset: {x: 0, y: 0.81, z: 0}
+    OriginOffset: {x: 0, y: 1.08, z: 0}
     Distance: 0.6
     DrawThick: 0
     Color: {r: 0, g: 1, b: 0.06282711, a: 1}
