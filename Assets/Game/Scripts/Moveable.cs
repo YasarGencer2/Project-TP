@@ -284,8 +284,9 @@ public class Moveable : MonoBehaviour
         var up = Vector3.up * wallJumpForceUp;
         var movementDirection = new Vector3(movementInput.x, 0, movementInput.y).normalized;
         var dir = movementDirection == Vector3.zero ? wallDirection : movementDirection;
-        var forward = (wallDirection * wallJumpForceSide / 2) + (dir * wallJumpForceSide / 2);
-
+        var forward1 = wallDirection * wallJumpForceSide;
+        var forward2 = forward1 / 2 + (dir * wallJumpForceSide / 2);
+        var forward = forward1.magnitude > forward2.magnitude ? forward1 : forward2;
 
         rb.linearDamping = startLinearDamping;
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
