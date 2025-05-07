@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(MoveableAnimator)), RequireComponent(typeof(Rigidbody))]
@@ -45,7 +46,11 @@ public class Moveable : MonoBehaviour
     [SerializeField] bool isGrounded;
     [SerializeField] bool isHangingOnWall;
 
-    [Space(5), Header("Debug")]
+    [Space(10), Header("Debug")]
+    [Space(5), Header("Ray Datas")]
+    [SerializeField] RayData wallJumpRayData;
+    [SerializeField] RayData isGroundedRayData;
+    [Space(5), Header("Values")]
     [SerializeField] float lookAngle = 0f;
     [SerializeField] int directionForward = 1;
     [SerializeField] int directionSideways = 0;
@@ -146,7 +151,7 @@ public class Moveable : MonoBehaviour
     {
         if (canCheckGrounded == false)
             return;
-        RaycastHit[] hits = Physics.RaycastAll(transform.position, Vector3.down, 0.05f);
+        RaycastHelper.RaycastAll(out RaycastHit[] hits, transform, isGroundedRayData); 
         isGrounded = hits.Length > 1;
         if (isGrounded == false && hits.Length > 0)
         {
@@ -158,7 +163,6 @@ public class Moveable : MonoBehaviour
             isJumping = false;
             isDoubleJumping = false;
             isHangingOnWall = false;
-
         }
     }
     public void Jump()
@@ -212,24 +216,15 @@ public class Moveable : MonoBehaviour
         }
         if (canCheckHangingOnWall == false)
             return;
-        RaycastHit hit;
-        Vector3[] directions = { transform.forward, transform.right, -transform.right, -transform.forward };
 
-        foreach (var direction in directions)
+        RaycastHelper.Raycast(out RaycastHit hit, transform, wallJumpRayData);
+        if (hit.collider != null && hit.collider.gameObject != this.gameObject)
         {
-            Debug.DrawRay(transform.position, direction * 0.75f, Color.red);
-            if (Physics.Raycast(transform.position, direction, out hit, 0.75f))
-            {
-                if (hit.collider != null && hit.collider.gameObject != this.gameObject)
-                {
-                    isHangingOnWall = true;
-                    isWalking = false;
-                    wallDirection = hit.normal;
-                    rb.linearVelocity = Vector3.zero;
-
-                    return;
-                }
-            }
+            isHangingOnWall = true;
+            isWalking = false;
+            wallDirection = hit.normal;
+            rb.linearVelocity = Vector3.zero;
+            return;
         }
         isHangingOnWall = false;
     }
@@ -307,7 +302,7 @@ public class Moveable : MonoBehaviour
         lookTo.Normalize();
     }
     void GetRotationOnWall()
-    { 
+    {
         // this face along
         // lastLookTo = lookTo;
         // lookTo = Vector3.Cross(-wallDirection, Vector3.up).normalized;
@@ -390,13 +385,12 @@ public class Moveable : MonoBehaviour
         moveableAnimator.SetJump();
     }
     #endregion
-}
 
-
-enum Directions
-{
-    Forward,
-    Backward,
-    Left,
-    Right
+    #region DEBUG
+    void OnDrawGizmos()
+    {
+        RaycastHelper.DrawRay(transform, wallJumpRayData);
+        RaycastHelper.DrawRay(transform, isGroundedRayData);
+    }
+    #endregion
 }

@@ -1924,6 +1924,24 @@ MonoBehaviour:
   isDoubleJumping: 0
   isGrounded: 0
   isHangingOnWall: 0
+  wallJumpRayData:
+    Directions: 00000000010000000200000003000000
+    OriginOffset: {x: 0, y: 0.9, z: 0}
+    Distance: 0.82
+    DrawThick: 0
+    Color: {r: 1, g: 0, b: 0, a: 1}
+    Mask:
+      serializedVersion: 2
+      m_Bits: 4294967295
+  isGroundedRayData:
+    Directions: 05000000
+    OriginOffset: {x: 0, y: 0, z: 0}
+    Distance: 13.96
+    DrawThick: 1
+    Color: {r: 0.074971795, g: 1, b: 0, a: 1}
+    Mask:
+      serializedVersion: 2
+      m_Bits: 4294967295
   lookAngle: 0
   directionForward: 1
   directionSideways: 0
