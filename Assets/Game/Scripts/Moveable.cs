@@ -35,6 +35,8 @@ public class Moveable : MonoBehaviour
 
 
     [Space(5), Header("Gravity")]
+    [SerializeField] float gravity = 0;
+    [Space(2)]
     [SerializeField] float gravityJumpForce = 9.81f;
     [SerializeField] float gravityFallForce = 9.81f;
     [SerializeField] float gravityHangOnWallForce = 9.81f;
@@ -68,11 +70,16 @@ public class Moveable : MonoBehaviour
     [SerializeField] Vector2 movementInput, lastMovementInput;
     [SerializeField] Vector2 lookInput, lastLookInput;
     [SerializeField] Vector3 lookTo, lastLookTo;
+    [SerializeField] float startLinearDamping;
 
     void Awake()
     {
         moveableAnimator = GetComponent<MoveableAnimator>();
         rb = GetComponent<Rigidbody>();
+    }
+    void Start()
+    {
+        startLinearDamping = rb.linearDamping;
     }
     void FixedUpdate()
     {
@@ -139,7 +146,7 @@ public class Moveable : MonoBehaviour
         lastMovementInput = movementInput;
     }
     void HandleSpeed()
-    { 
+    {
         if (isWalking)
         {
             if (activeSpeed < minSpeed)
@@ -197,10 +204,10 @@ public class Moveable : MonoBehaviour
         }
         else
         {
-            JumpFroce();
-            JumpAnimation();
             if (isJumping == true)
                 isDoubleJumping = true;
+            JumpFroce();
+            JumpAnimation();
         }
 
         isJumping = true;
@@ -221,6 +228,8 @@ public class Moveable : MonoBehaviour
     }
     public void CancelJump()
     {
+        if (jumpInput == true)
+            isJumping = false;
         jumpInput = false;
     }
     IEnumerator SetCanCheckGrounded(bool value)
@@ -238,9 +247,10 @@ public class Moveable : MonoBehaviour
     }
     void SetIsHangingOnWall()
     {
-        if (isGrounded || isJumping == false)
+        if (isGrounded)
         {
             isHangingOnWall = false;
+            rb.linearDamping = startLinearDamping;
             return;
         }
         if (canCheckHangingOnWall == false)
@@ -257,20 +267,28 @@ public class Moveable : MonoBehaviour
                     isWalking = false;
                     isDoubleJumping = false;
                     rb.linearVelocity = Vector3.zero;
+                    rb.linearDamping = 0;
                 }
                 wallDirection = hit.normal;
                 isHangingOnWall = true;
                 return;
             }
         }
+        rb.linearDamping = startLinearDamping;
         isHangingOnWall = false;
     }
     void WallJumpForce()
     {
         var up = Vector3.up * wallJumpForceUp;
-        var forward = wallDirection * wallJumpForceSide;
+        var movementDirection = new Vector3(movementInput.x, 0, movementInput.y).normalized;
+        var dir = movementDirection == Vector3.zero ? wallDirection : movementDirection;
+        var forward = (wallDirection * wallJumpForceSide / 2) + (dir * wallJumpForceSide / 2);
+
+
+        rb.linearDamping = startLinearDamping;
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         rb.AddForce(up + forward, ForceMode.Impulse);
+
         isWallJumping = true;
         if (wallJumpCoroutine != null)
             StopCoroutine(wallJumpCoroutine);
@@ -294,10 +312,10 @@ public class Moveable : MonoBehaviour
     {
         if (isGrounded)
             return;
-        var force = isJumping ? gravityJumpForce : gravityFallForce;
+        gravity = isJumping ? gravityJumpForce : gravityFallForce;
         if (isHangingOnWall)
-            force = wallGravityStartTimeCounter <= 0 ? gravityHangOnWallForce : 0;
-        rb.AddForce(Vector3.down * force * Time.deltaTime, ForceMode.Impulse);
+            gravity = wallGravityStartTimeCounter <= 0 ? gravityHangOnWallForce : 0;
+        rb.AddForce(Vector3.down * gravity * Time.fixedDeltaTime, ForceMode.Impulse);
     }
     #endregion
     #region Look
@@ -344,11 +362,16 @@ public class Moveable : MonoBehaviour
     void GetRotationOnWall()
     {
         // this face along
-        // lastLookTo = lookTo;
-        // lookTo = Vector3.Cross(-wallDirection, Vector3.up).normalized;
-
         lastLookTo = lookTo;
-        lookTo = wallDirection.normalized;
+        lookTo = Vector3.Cross(Vector3.up, wallDirection).normalized;
+        if (Vector3.Dot(lookTo, lastMovementInput) < 0)
+        {
+            lookTo = -lookTo;
+        }
+
+        // this face away
+        // lastLookTo = lookTo;
+        // lookTo = wallDirection.normalized;
     }
     void Look()
     {
