@@ -1911,7 +1911,8 @@ MonoBehaviour:
   doubleJumpForce: 20
   canCheckGrounded: 1
   jumpInput: 0
-  wallJumpForce: 10
+  wallJumpForce: 15
+  wallJumpTime: 0.2
   canCheckHangingOnWall: 1
   wallDirection: {x: 0, y: 0, z: 0}
   gravityJumpForce: 50
@@ -1924,9 +1925,10 @@ MonoBehaviour:
   isDoubleJumping: 0
   isGrounded: 0
   isHangingOnWall: 0
+  isWallJumping: 0
   wallJumpRayData:
     Directions: 00000000010000000200000003000000
-    OriginOffset: {x: 0, y: 0.9, z: 0}
+    OriginOffset: {x: 0, y: 2, z: 0}
     Distance: 0.82
     DrawThick: 0
     Color: {r: 1, g: 0, b: 0, a: 1}
@@ -1935,13 +1937,31 @@ MonoBehaviour:
       m_Bits: 4294967295
   isGroundedRayData:
     Directions: 05000000
-    OriginOffset: {x: 0, y: 0, z: 0}
-    Distance: 13.96
+    OriginOffset: {x: 0, y: 0.01, z: 0}
+    Distance: 0.075
     DrawThick: 1
     Color: {r: 0.074971795, g: 1, b: 0, a: 1}
     Mask:
       serializedVersion: 2
       m_Bits: 4294967295
+  ledgeBottomRayData:
+    Directions: 00000000
+    OriginOffset: {x: 0, y: 0.42, z: 0}
+    Distance: 0.6
+    DrawThick: 0
+    Color: {r: 0, g: 1, b: 0.06282711, a: 1}
+    Mask:
+      serializedVersion: 2
+      m_Bits: 55
+  ledgeTopRayData:
+    Directions: 00000000
+    OriginOffset: {x: 0, y: 0.81, z: 0}
+    Distance: 0.6
+    DrawThick: 0
+    Color: {r: 0, g: 1, b: 0.06282711, a: 1}
+    Mask:
+      serializedVersion: 2
+      m_Bits: 55
   lookAngle: 0
   directionForward: 1
   directionSideways: 0

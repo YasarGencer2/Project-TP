@@ -24,8 +24,10 @@ public class Moveable : MonoBehaviour
 
     [Space(2), Header("Wall Jump")]
     [SerializeField] float wallJumpForce = 5f;
+    [SerializeField] float wallJumpTime = 0.25f;
     [SerializeField] bool canCheckHangingOnWall = true;
     [SerializeField] Vector3 wallDirection = Vector3.zero;
+    Coroutine wallJumpCoroutine;
 
 
     [Space(5), Header("Gravity")]
@@ -45,11 +47,14 @@ public class Moveable : MonoBehaviour
     [SerializeField] bool isDoubleJumping;
     [SerializeField] bool isGrounded;
     [SerializeField] bool isHangingOnWall;
+    [SerializeField] bool isWallJumping;
 
     [Space(10), Header("Debug")]
     [Space(5), Header("Ray Datas")]
     [SerializeField] RayData wallJumpRayData;
     [SerializeField] RayData isGroundedRayData;
+    [SerializeField] RayData ledgeBottomRayData;
+    [SerializeField] RayData ledgeTopRayData;
     [Space(5), Header("Values")]
     [SerializeField] float lookAngle = 0f;
     [SerializeField] int directionForward = 1;
@@ -79,6 +84,7 @@ public class Moveable : MonoBehaviour
         JumpLogic();
         GravityLogic();
         LookLogic();
+        MovementHelpers();
     }
     void MoveLogic()
     {
@@ -94,6 +100,15 @@ public class Moveable : MonoBehaviour
     void GravityLogic()
     {
         UpdateGravity();
+    }
+    void LookLogic()
+    {
+        GetLookInput();
+        Look();
+    }
+    void MovementHelpers()
+    {
+        LedgeHelper();
     }
 
     #region Walk
@@ -115,7 +130,7 @@ public class Moveable : MonoBehaviour
     }
     void HandleSpeed()
     {
-        if (isHangingOnWall)
+        if (isHangingOnWall || isWallJumping)
         {
             activeSpeed = 0;
             return;
@@ -151,7 +166,7 @@ public class Moveable : MonoBehaviour
     {
         if (canCheckGrounded == false)
             return;
-        RaycastHelper.RaycastAll(out RaycastHit[] hits, transform, isGroundedRayData); 
+        RaycastHelper.RaycastAll(out RaycastHit[] hits, transform, isGroundedRayData);
         isGrounded = hits.Length > 1;
         if (isGrounded == false && hits.Length > 0)
         {
@@ -234,11 +249,20 @@ public class Moveable : MonoBehaviour
         var forward = wallDirection * wallJumpForce;
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         rb.AddForce(up + forward, ForceMode.Impulse);
+        isWallJumping = true;
+        if (wallJumpCoroutine != null)
+            StopCoroutine(wallJumpCoroutine);
+        wallJumpCoroutine = StartCoroutine(SetIsWallJumping(false));
     }
     IEnumerator SetCanCheckHanginOnWall(bool value)
     {
         yield return new WaitForSeconds(0.15f);
         canCheckHangingOnWall = value;
+    }
+    IEnumerator SetIsWallJumping(bool value)
+    {
+        yield return new WaitForSeconds(wallJumpTime);
+        isWallJumping = value;
     }
     #endregion
     #endregion
@@ -255,12 +279,6 @@ public class Moveable : MonoBehaviour
     }
     #endregion
     #region Look
-    void LookLogic()
-    {
-        GetLookInput();
-        Look();
-        SetDirectionByLookDirection();
-    }
     void GetLookInput()
     {
         if (isHangingOnWall)
@@ -322,32 +340,22 @@ public class Moveable : MonoBehaviour
 
         transform.rotation = Quaternion.Slerp(a, b, t);
     }
-    void SetDirectionByLookDirection()
+    #endregion
+    #region Movement Helpers
+    void LedgeHelper()
     {
-        var moveDirection = new Vector3(lastMovementInput.x, 0, lastMovementInput.y);
-        var lookDirection = transform.forward;
-        var direction = Vector3.Dot(moveDirection, lookDirection);
-        if (direction > 0.5f)
+        if (isHangingOnWall)
+            return;
+        if (isGrounded)
+            return;
+        RaycastHelper.Raycast(out RaycastHit hitTop, transform, ledgeTopRayData);
+        RaycastHelper.Raycast(out RaycastHit hitBottom, transform, ledgeBottomRayData);
+        if (hitTop.collider == null || hitBottom.collider != null)
         {
-            directionByRotation = Directions.Forward;
-        }
-        else if (direction < -0.5f)
-        {
-            directionByRotation = Directions.Backward;
-        }
-        else if (Vector3.Dot(moveDirection, transform.right) > 0.5f)
-        {
-            directionByRotation = Directions.Right;
-        }
-        else if (Vector3.Dot(moveDirection, -transform.right) > 0.5f)
-        {
-            directionByRotation = Directions.Left;
-        }
-        else
-        {
-            directionByRotation = Directions.Forward;
+            rb.MovePosition(rb.position + Vector3.up * Time.deltaTime * (ledgeTopRayData.OriginOffset.y - ledgeBottomRayData.OriginOffset.y));
         }
     }
+
     #endregion
     #endregion
 
@@ -391,6 +399,8 @@ public class Moveable : MonoBehaviour
     {
         RaycastHelper.DrawRay(transform, wallJumpRayData);
         RaycastHelper.DrawRay(transform, isGroundedRayData);
+        RaycastHelper.DrawRay(transform, ledgeBottomRayData);
+        RaycastHelper.DrawRay(transform, ledgeTopRayData);
     }
     #endregion
 }
