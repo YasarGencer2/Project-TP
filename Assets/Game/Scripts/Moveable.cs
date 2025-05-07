@@ -51,8 +51,9 @@ public class Moveable : MonoBehaviour
 
     [Space(10), Header("Debug")]
     [Space(5), Header("Ray Datas")]
-    [SerializeField] RayData wallJumpRayData;
     [SerializeField] RayData isGroundedRayData;
+    [SerializeField] RayData wallJumpRayData;
+    [SerializeField] RayData wallJumpGroundRayData;
     [SerializeField] RayData ledgeBottomRayData;
     [SerializeField] RayData ledgeTopRayData;
     [Space(5), Header("Values")]
@@ -232,14 +233,18 @@ public class Moveable : MonoBehaviour
         if (canCheckHangingOnWall == false)
             return;
 
-        RaycastHelper.Raycast(out RaycastHit hit, transform, wallJumpRayData);
-        if (hit.collider != null && hit.collider.gameObject != this.gameObject)
+        if (RaycastHelper.RaycastAll(out RaycastHit[] hits, transform, wallJumpGroundRayData) == false)
         {
-            isHangingOnWall = true;
-            isWalking = false;
-            wallDirection = hit.normal;
-            rb.linearVelocity = Vector3.zero;
-            return;
+            RaycastHelper.Raycast(out RaycastHit hit, transform, wallJumpRayData);
+            if (hit.collider != null && hit.collider.gameObject != this.gameObject)
+            {
+                isHangingOnWall = true;
+                isWalking = false;
+                isDoubleJumping = true;
+                wallDirection = hit.normal;
+                rb.linearVelocity = Vector3.zero;
+                return;
+            }
         }
         isHangingOnWall = false;
     }
@@ -397,8 +402,9 @@ public class Moveable : MonoBehaviour
     #region DEBUG
     void OnDrawGizmos()
     {
-        RaycastHelper.DrawRay(transform, wallJumpRayData);
         RaycastHelper.DrawRay(transform, isGroundedRayData);
+        RaycastHelper.DrawRay(transform, wallJumpRayData);
+        RaycastHelper.DrawRay(transform, wallJumpGroundRayData);
         RaycastHelper.DrawRay(transform, ledgeBottomRayData);
         RaycastHelper.DrawRay(transform, ledgeTopRayData);
     }

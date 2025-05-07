@@ -1049,7 +1049,7 @@ Transform:
   m_GameObject: {fileID: 573024182}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.47, y: -6.7, z: 19.7}
+  m_LocalPosition: {x: -0.47, y: -6.7, z: 16.58}
   m_LocalScale: {x: 5, y: 1, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1541,7 +1541,7 @@ Transform:
   m_GameObject: {fileID: 982141013}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -18.61, y: -13.51, z: 9.6}
+  m_LocalPosition: {x: -18.61, y: -16.78, z: 9.6}
   m_LocalScale: {x: 5, y: 1, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1926,15 +1926,6 @@ MonoBehaviour:
   isGrounded: 0
   isHangingOnWall: 0
   isWallJumping: 0
-  wallJumpRayData:
-    Directions: 00000000010000000200000003000000
-    OriginOffset: {x: 0, y: 2, z: 0}
-    Distance: 0.82
-    DrawThick: 0
-    Color: {r: 1, g: 0, b: 0, a: 1}
-    Mask:
-      serializedVersion: 2
-      m_Bits: 4294967295
   isGroundedRayData:
     Directions: 05000000
     OriginOffset: {x: 0, y: 0.01, z: 0}
@@ -1944,6 +1935,24 @@ MonoBehaviour:
     Mask:
       serializedVersion: 2
       m_Bits: 4294967295
+  wallJumpRayData:
+    Directions: 00000000010000000200000003000000
+    OriginOffset: {x: 0, y: 2, z: 0}
+    Distance: 0.82
+    DrawThick: 0
+    Color: {r: 1, g: 0, b: 0, a: 1}
+    Mask:
+      serializedVersion: 2
+      m_Bits: 4294967295
+  wallJumpGroundRayData:
+    Directions: 05000000
+    OriginOffset: {x: 0, y: 0, z: 0}
+    Distance: 0.75
+    DrawThick: 0
+    Color: {r: 1, g: 0, b: 0, a: 1}
+    Mask:
+      serializedVersion: 2
+      m_Bits: 55
   ledgeBottomRayData:
     Directions: 00000000
     OriginOffset: {x: 0, y: 0.42, z: 0}
@@ -2708,7 +2717,7 @@ Transform:
   m_GameObject: {fileID: 1431842819}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -6.69, y: -13.51, z: 9.6}
+  m_LocalPosition: {x: -6.69, y: -16.78, z: 9.6}
   m_LocalScale: {x: 5, y: 1, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3173,7 +3182,7 @@ Transform:
   m_GameObject: {fileID: 1619328613}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -12.39, y: -6.7, z: 19.7}
+  m_LocalPosition: {x: -12.39, y: -6.7, z: 16.58}
   m_LocalScale: {x: 5, y: 1, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3364,7 +3373,7 @@ Transform:
   m_GameObject: {fileID: 1943152718}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -24.18, y: -6.7, z: 19.7}
+  m_LocalPosition: {x: -24.18, y: -6.7, z: 16.58}
   m_LocalScale: {x: 5, y: 1, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children:
