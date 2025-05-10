@@ -32,6 +32,7 @@ public class Moveable : MonoBehaviour
     [SerializeField] float wallGravityStartTime = 0.25f;
     [SerializeField] float wallGravityStartTimeCounter = 0f;
     [SerializeField] Vector3 wallDirection = Vector3.zero;
+    [SerializeField] GameObject wall;
     Coroutine wallJumpCoroutine, canCheckHangingOnWallCoroutine;
 
     [Space(5), Header("Crouch")]
@@ -112,6 +113,7 @@ public class Moveable : MonoBehaviour
     void MoveLogic()
     {
         GetWalkInput();
+        GetWallHangingMovementInput();
         HandleSpeed();
         Walk();
     }
@@ -146,7 +148,36 @@ public class Moveable : MonoBehaviour
     #region Walk
     void GetWalkInput()
     {
+        if (isHangingOnWall)
+            return;
         movementInput = InputManager.Instance.GetMovementInput();
+        isWalking = movementInput.magnitude > 0;
+        SetLastWalkInput();
+    }
+    void GetWallHangingMovementInput()
+    {
+        if (isHangingOnWall == false)
+            return;
+        var input = InputManager.Instance.GetMovementInput();
+        if (input.magnitude <= 0)
+        {
+            movementInput = input;
+        }
+        else
+        {
+            var dir = new Vector3(input.x, 0, input.y).normalized;
+            var wallDir = new Vector3(-wallDirection.x, 0, -wallDirection.z).normalized;
+            if (Vector3.Dot(dir, wallDir) > 0.9f)
+            {
+                movementInput = Vector2.zero;
+            }
+            else
+            {
+                movementInput = input;
+            }
+        }
+
+
         isWalking = movementInput.magnitude > 0;
         SetLastWalkInput();
     }
@@ -216,6 +247,7 @@ public class Moveable : MonoBehaviour
         {
             var hit = hits[0];
             isGrounded = hit.collider.gameObject != this;
+            wall = null;
         }
         if (isGrounded)
         {
@@ -300,17 +332,22 @@ public class Moveable : MonoBehaviour
             {
                 if (isHangingOnWall == false)
                 {
-                    wallGravityStartTimeCounter = wallGravityStartTime;
+                    if (wall != hit.collider.gameObject)
+                    {
+                        wallGravityStartTimeCounter = wallGravityStartTime;
+                        rb.linearVelocity = Vector3.zero;
+                    }
                     isWalking = false;
                     isDoubleJumping = false;
-                    rb.linearVelocity = Vector3.zero;
                     rb.linearDamping = 0;
                 }
+                wall = hit.collider.gameObject;
                 wallDirection = hit.normal;
                 isHangingOnWall = true;
                 return;
             }
         }
+        wallDirection = Vector3.zero;
         rb.linearDamping = startLinearDamping;
         isHangingOnWall = false;
     }
