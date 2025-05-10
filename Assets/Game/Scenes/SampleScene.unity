@@ -2384,6 +2384,8 @@ MonoBehaviour:
   normalHeight: 1
   crouchHeight: 0.5
   crouchInput: 0
+  slideSpeed: 30
+  slideSpeedLoseTime: 0.6
   gravity: 0
   gravityJumpForce: 75
   gravityFallForce: 120
@@ -2397,6 +2399,7 @@ MonoBehaviour:
   isHangingOnWall: 0
   isWallJumping: 0
   isCrouching: 0
+  isSliding: 0
   isGroundedRayData:
     Directions: 05000000
     OriginOffset: {x: 0, y: 0.01, z: 0}
