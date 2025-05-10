@@ -42,6 +42,12 @@ public class Moveable : MonoBehaviour
 
     [SerializeField] bool crouchInput = false;
 
+    [Space(2)]
+    [SerializeField] float slideSpeed = 30f;
+    [SerializeField] float slideSpeedLoseTime = 0.5f;
+    [SerializeField] bool canSlide = true;
+    Coroutine canSlideCoroutine;
+
 
     [Space(5), Header("Gravity")]
     [SerializeField] float gravity = 0;
@@ -64,6 +70,7 @@ public class Moveable : MonoBehaviour
     [SerializeField] bool isHangingOnWall;
     [SerializeField] bool isWallJumping;
     [SerializeField] bool isCrouching;
+    [SerializeField] bool isSliding;
 
     [Space(10), Header("Debug")]
     [Space(0), Header("Ray Datas")]
@@ -206,6 +213,7 @@ public class Moveable : MonoBehaviour
                 maxSpeed = crouchSpeed;
             }
 
+
             if (activeSpeed < minSpeed)
                 activeSpeed = minSpeed;
             if (activeSpeed < midSpeed)
@@ -218,12 +226,25 @@ public class Moveable : MonoBehaviour
             }
             else if (activeSpeed > maxSpeed)
             {
-                activeSpeed -= Time.deltaTime * (maxSpeed / speedGainTimeTillMax);
+                if (isSliding)
+                {
+                    activeSpeed -= Time.deltaTime * (slideSpeed / slideSpeedLoseTime);
+                }
+                else
+                {
+                    activeSpeed -= Time.deltaTime * (maxSpeed / speedLoseTime);
+                }
             }
             lastMovingSpeed = activeSpeed;
         }
         else
         {
+
+            var speedLoseTime = this.speedLoseTime;
+            if (isSliding)
+            {
+                speedLoseTime = slideSpeedLoseTime;
+            }
             if (activeSpeed > 0)
                 activeSpeed -= Time.deltaTime * (lastMovingSpeed / speedLoseTime);
             else
@@ -395,11 +416,17 @@ public class Moveable : MonoBehaviour
         if (isCrouching == false && isGrounded)
             FirstCrouch();
         Crouching();
+        Sliding();
     }
     void FirstCrouch()
     {
         isCrouching = true;
         transform.localScale = new Vector3(1, crouchHeight, 1);
+
+        if (isGrounded && activeSpeed > midSpeed)
+        {
+            Slide();
+        }
     }
     void Crouching()
     {
@@ -409,7 +436,36 @@ public class Moveable : MonoBehaviour
     void CancelCrouch()
     {
         isCrouching = false;
+        isSliding = false;
         transform.localScale = new Vector3(1, normalHeight, 1);
+    }
+    void Slide()
+    {
+        if (isSliding)
+            return;
+        if (canSlide == false)
+            return;
+        isSliding = true;
+        activeSpeed = slideSpeed;
+        if (canSlideCoroutine != null)
+            StopCoroutine(canSlideCoroutine);
+        canSlideCoroutine = StartCoroutine(SetCanSlide(true));
+        canSlide = false;
+    }
+    void Sliding()
+    {
+        if (isSliding && isCrouching)
+        {
+            if (activeSpeed < minSpeed)
+            {
+                isSliding = false;
+            }
+        }
+    }
+    IEnumerator SetCanSlide(bool value)
+    {
+        yield return new WaitForSeconds(.5f);
+        canSlide = value;
     }
     #endregion
     #region Gravity
