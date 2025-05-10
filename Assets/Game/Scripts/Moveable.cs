@@ -22,7 +22,7 @@ public class Moveable : MonoBehaviour
     [SerializeField] float doubleJumpForce = 5f;
     [SerializeField] bool canCheckGrounded = true;
     [SerializeField] bool holdingJump = false;
-    public bool jumpInput = false;
+    [SerializeField] bool jumpInput = false;
 
     [Space(2), Header("Wall Jump")]
     [SerializeField] float wallJumpForceUp = 5f;
@@ -33,6 +33,13 @@ public class Moveable : MonoBehaviour
     [SerializeField] float wallGravityStartTimeCounter = 0f;
     [SerializeField] Vector3 wallDirection = Vector3.zero;
     Coroutine wallJumpCoroutine, canCheckHangingOnWallCoroutine;
+
+    [Space(5), Header("Crouch")]
+    [SerializeField] float crouchSpeed = 4f;
+    [SerializeField] float normalHeight = 1f;
+    [SerializeField] float crouchHeight = 0.5f;
+
+    [SerializeField] bool crouchInput = false;
 
 
     [Space(5), Header("Gravity")]
@@ -55,6 +62,7 @@ public class Moveable : MonoBehaviour
     [SerializeField] bool isGrounded;
     [SerializeField] bool isHangingOnWall;
     [SerializeField] bool isWallJumping;
+    [SerializeField] bool isCrouching;
 
     [Space(10), Header("Debug")]
     [Space(0), Header("Ray Datas")]
@@ -95,6 +103,7 @@ public class Moveable : MonoBehaviour
     {
         MoveLogic();
         JumpLogic();
+        CrouchLogic();
         WallLogic();
         GravityLogic();
         LookLogic();
@@ -114,6 +123,11 @@ public class Moveable : MonoBehaviour
     {
         SetIsHangingOnWall();
         CountWallGravity();
+    }
+    void CrouchLogic()
+    {
+        GetCrouchInput();
+        HandleCrouch();
     }
     void GravityLogic()
     {
@@ -150,6 +164,17 @@ public class Moveable : MonoBehaviour
     {
         if (isWalking)
         {
+            var minSpeed = this.minSpeed;
+            var midSpeed = this.midSpeed;
+            var maxSpeed = this.maxSpeed;
+
+            if (isCrouching)
+            {
+                minSpeed = crouchSpeed;
+                midSpeed = crouchSpeed;
+                maxSpeed = crouchSpeed;
+            }
+
             if (activeSpeed < minSpeed)
                 activeSpeed = minSpeed;
             if (activeSpeed < midSpeed)
@@ -160,13 +185,19 @@ public class Moveable : MonoBehaviour
             {
                 activeSpeed += Time.deltaTime * (maxSpeed / speedGainTimeTillMax);
             }
+            else if (activeSpeed > maxSpeed)
+            {
+                activeSpeed -= Time.deltaTime * (maxSpeed / speedGainTimeTillMax);
+            }
             lastMovingSpeed = activeSpeed;
         }
         else
         {
-            activeSpeed -= Time.deltaTime * (lastMovingSpeed / speedLoseTime);
+            if (activeSpeed > 0)
+                activeSpeed -= Time.deltaTime * (lastMovingSpeed / speedLoseTime);
+            else
+                activeSpeed = 0;
         }
-        activeSpeed = Mathf.Clamp(activeSpeed, 0, maxSpeed);
     }
     void Walk()
     {
@@ -200,6 +231,10 @@ public class Moveable : MonoBehaviour
         var canJump = isHangingOnWall || (isGrounded = false || isDoubleJumping == false);
         if (canJump == false)
             return;
+
+        if (isCrouching)
+            CancelCrouch();
+
         if (isHangingOnWall)
         {
             WallJumpForce();
@@ -309,7 +344,35 @@ public class Moveable : MonoBehaviour
     }
     #endregion
     #endregion
+    #region Crouch
+    void GetCrouchInput()
+    {
+        crouchInput = InputManager.Instance.GetCrouchInput();
+        if (crouchInput == false)
+            CancelCrouch();
+    }
+    void HandleCrouch()
+    {
+        if (crouchInput == false)
+            return;
+        if (isCrouching == false && isGrounded)
+        {
+            isCrouching = true;
+            // first crouch
+            transform.localScale = new Vector3(1, crouchHeight, 1);
+        }
 
+        if (isCrouching)
+        {
+
+        }
+    }
+    void CancelCrouch()
+    {
+        isCrouching = false;
+        transform.localScale = new Vector3(1, normalHeight, 1);
+    }
+    #endregion
     #region Gravity
     void UpdateGravity()
     {
