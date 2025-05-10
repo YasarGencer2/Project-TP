@@ -2292,14 +2292,15 @@ MonoBehaviour:
   speedGainTimeTillMax: 1
   speedLoseTime: 0.25
   jumpForce: 25
-  doubleJumpForce: 10
+  doubleJumpForce: 15
   canCheckGrounded: 1
+  holdingJump: 0
   jumpInput: 0
   wallJumpForceUp: 15
   wallJumpForceSide: 10
   wallJumpTime: 0.2
   canCheckHangingOnWall: 1
-  wallGravityStartTime: 0.25
+  wallGravityStartTime: 0.1
   wallGravityStartTimeCounter: 0
   wallDirection: {x: 0, y: 0, z: 0}
   gravity: 0
