@@ -17,6 +17,8 @@ public class GamepadLayout : MonoBehaviour
         inputActions.FindAction("Player/Look").canceled += OnLook;
         inputActions.FindAction("Player/Jump").performed += OnJump;
         inputActions.FindAction("Player/Jump").canceled += OnJump;
+        inputActions.FindAction("Player/Crouch").performed += OnCrouch;
+        inputActions.FindAction("Player/Crouch").canceled += OnCrouch;
     }
     void OnDisable()
     {
@@ -27,6 +29,8 @@ public class GamepadLayout : MonoBehaviour
         inputActions.FindAction("Player/Look").canceled -= OnLook;
         inputActions.FindAction("Player/Jump").performed -= OnJump;
         inputActions.FindAction("Player/Jump").canceled -= OnJump;
+        inputActions.FindAction("Player/Crouch").performed -= OnCrouch;
+        inputActions.FindAction("Player/Crouch").canceled -= OnCrouch;
     }
     void OnMove(InputAction.CallbackContext context)
     {
@@ -53,6 +57,19 @@ public class GamepadLayout : MonoBehaviour
         else if (context.canceled)
         {
             aButton.gameObject.SetActive(false);
+        }
+    }
+    void OnCrouch(InputAction.CallbackContext context)
+    {
+        if (InputManager.Instance.OnGamepad == false)
+            return;
+        if (context.performed)
+        {
+            bButton.gameObject.SetActive(true);
+        }
+        else if (context.canceled)
+        {
+            bButton.gameObject.SetActive(false);
         }
     }
 

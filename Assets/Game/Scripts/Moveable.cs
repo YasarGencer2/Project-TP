@@ -393,16 +393,18 @@ public class Moveable : MonoBehaviour
         if (crouchInput == false)
             return;
         if (isCrouching == false && isGrounded)
-        {
-            isCrouching = true;
-            // first crouch
-            transform.localScale = new Vector3(1, crouchHeight, 1);
-        }
-
-        if (isCrouching)
-        {
-
-        }
+            FirstCrouch();
+        Crouching();
+    }
+    void FirstCrouch()
+    {
+        isCrouching = true;
+        transform.localScale = new Vector3(1, crouchHeight, 1);
+    }
+    void Crouching()
+    {
+        if (isCrouching == false)
+            return;
     }
     void CancelCrouch()
     {
