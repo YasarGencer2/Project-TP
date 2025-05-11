@@ -309,12 +309,10 @@ public class Moveable : MonoBehaviour
     public void Jump(bool fromBuffer = false)
     {
         jumpInput = true;
-        holdingJump = true;
-        if (isHangingOnWall)
-            return;
+        holdingJump = true; 
         if (fromBuffer == false)
         {
-            var canJump = isGrounded = false || isDoubleJumping == false;
+            var canJump = isHangingOnWall || (isGrounded = false || isDoubleJumping == false);
             if (canJump == false)
             {
                 jumpBufferCounter = jumpBufferTime;
@@ -342,6 +340,7 @@ public class Moveable : MonoBehaviour
             if (isJumping == true)
                 isDoubleJumping = true;
             JumpFroce();
+            VFXSystem.Instance.PLayVFX(VFXType.Jump, transform.position);
         }
 
         moveableAnimator.SetTrigger("Jump");
