@@ -6,8 +6,8 @@ using UnityEngine;
 [RequireComponent(typeof(MoveableAnimator)), RequireComponent(typeof(Rigidbody))]
 public class Moveable : MonoBehaviour
 {
-    [HideInInspector] MoveableAnimator moveableAnimator;
-    [HideInInspector] Rigidbody rb;
+    MoveableAnimator moveableAnimator;
+    Rigidbody rb;
 
     [Header("Movement")]
     [SerializeField] float activeSpeed = 5f;
@@ -308,8 +308,9 @@ public class Moveable : MonoBehaviour
             if (isJumping == true)
                 isDoubleJumping = true;
             JumpFroce();
-            JumpAnimation();
         }
+
+        moveableAnimator.SetTrigger("Jump");
 
         isJumping = true;
         isGrounded = false;
@@ -435,7 +436,7 @@ public class Moveable : MonoBehaviour
     void FirstCrouch()
     {
         isCrouching = true;
-        transform.localScale = new Vector3(1, crouchHeight, 1);
+        // transform.localScale = new Vector3(1, crouchHeight, 1);
 
         if (activeSpeed > minSpeed)
         {
@@ -455,7 +456,7 @@ public class Moveable : MonoBehaviour
         isCrouching = false;
         isSliding = false;
         isAirSliding = false;
-        transform.localScale = new Vector3(1, normalHeight, 1);
+        // transform.localScale = new Vector3(1, normalHeight, 1);
     }
     void Slide()
     {
@@ -469,6 +470,7 @@ public class Moveable : MonoBehaviour
             StopCoroutine(canSlideCoroutine);
         canSlideCoroutine = StartCoroutine(SetCanSlide(true));
         canSlide = false;
+        moveableAnimator.SetTrigger("Slide");
     }
     void Sliding()
     {
@@ -492,6 +494,7 @@ public class Moveable : MonoBehaviour
             StopCoroutine(canAirSlideCoroutine);
         canAirSlideCoroutine = StartCoroutine(SetCanAirSlide(true));
         canAirSlide = false;
+        moveableAnimator.SetTrigger("AirSlide");
     }
     void AirSliding()
     {
@@ -544,11 +547,23 @@ public class Moveable : MonoBehaviour
     }
     void GetRotationOnKeyboardAndMouse()
     {
-        var mousePos = InputManager.Instance.GetMousePosition();
+        // var mousePos = InputManager.Instance.GetMousePosition();
+        // lastLookTo = lookTo;
+        // lookTo = mousePos - transform.position;
+        // lookTo.Normalize();
+        // lookTo.y = 0; 
+        if (movementInput != Vector2.zero)
+        {
+            lookInput = movementInput;
+        }
+        else
+        {
+            lookInput = lastLookInput;
+        }
+        lastLookInput = lookInput;
         lastLookTo = lookTo;
-        lookTo = mousePos - transform.position;
+        lookTo = new Vector3(lookInput.x, 0, lookInput.y);
         lookTo.Normalize();
-        lookTo.y = 0;
     }
     void GetRotationOnGamepad()
     {
@@ -568,17 +583,20 @@ public class Moveable : MonoBehaviour
     }
     void GetRotationOnWall()
     {
-        // this face along
-        lastLookTo = lookTo;
-        lookTo = Vector3.Cross(Vector3.up, wallDirection).normalized;
-        if (Vector3.Dot(lookTo, lastMovementInput) < 0)
+        if (activeSpeed < minSpeed)
         {
-            lookTo = -lookTo;
+            lastLookTo = lookTo;
+            lookTo = -wallDirection.normalized;
         }
-
-        // this face away
-        // lastLookTo = lookTo;
-        // lookTo = wallDirection.normalized;
+        else
+        {
+            lastLookTo = lookTo;
+            lookTo = Vector3.Cross(Vector3.up, wallDirection).normalized;
+            if (Vector3.Dot(lookTo, lastMovementInput) < 0)
+            {
+                lookTo = -lookTo;
+            }
+        }
     }
     void Look()
     {
@@ -613,41 +631,20 @@ public class Moveable : MonoBehaviour
 
     #endregion
     #endregion
-
-    #region ANIMATIONS
+    #region Animations
     void HandleAnimations()
     {
-        WalkAnimation();
-        LandAnimation();
+        moveableAnimator.SetBool("isWalking", isWalking);
+        moveableAnimator.SetBool("isJumping", isJumping);
+        moveableAnimator.SetBool("isGrounded", isGrounded);
+        moveableAnimator.SetBool("isHanging", isHangingOnWall);
+        moveableAnimator.SetBool("isSliding", isSliding);
+        moveableAnimator.SetBool("isCrouching", isCrouching);
+        moveableAnimator.SetFloat("Speed", activeSpeed / maxSpeed);
     }
-    void WalkAnimation()
-    {
-        HandleAnimationWalkSpeed();
-        HandleAnimationWalkDirection();
-    }
-    void HandleAnimationWalkSpeed()
-    {
-        moveableAnimator.SetSpeed(activeSpeed);
-    }
-    void HandleAnimationWalkDirection()
-    {
-        var movingDirection = new Vector3(lastMovementInput.x, 0, lastMovementInput.y);
-        var lookDirection = transform.forward;
 
-        directionForward = Vector3.Dot(movingDirection.normalized, lookDirection) > 0.5f ? 1 : -1;
-
-        moveableAnimator.SetDirectionForward(directionForward);
-    }
-    void LandAnimation()
-    {
-        if (isGrounded)
-            moveableAnimator.SetLand();
-    }
-    void JumpAnimation()
-    {
-        moveableAnimator.SetJump();
-    }
     #endregion
+
 
     #region DEBUG
     void OnDrawGizmos()

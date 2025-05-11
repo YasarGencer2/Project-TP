@@ -5,55 +5,17 @@ public class MoveableAnimator : MonoBehaviour
     [SerializeField] private Animator _animator;
     public Animator Animator => _animator;
 
-
-    public void SetSpeed(float speed)
+    public void SetBool(string param, bool value)
     {
-        if (_animator == null)
-        {
-            Debug.LogWarning("Animator is not assigned.");
-            return;
-        }
-
-        _animator.SetFloat("Speed", speed);
+        if (Animator) Animator.SetBool(param, value);
     }
-    public void SetDirectionForward(int directionForward)
-    {
-        if (_animator == null)
-        {
-            Debug.LogWarning("Animator is not assigned.");
-            return;
-        }
 
-        _animator.SetFloat("DirectionForward", directionForward);
+    public void SetFloat(string param, float value)
+    {
+        if (Animator) Animator.SetFloat(param, value);
     }
-    public void SetDirectionSideways(int directionSideways)
+    public void SetTrigger(string param)
     {
-        if (_animator == null)
-        {
-            Debug.LogWarning("Animator is not assigned.");
-            return;
-        }
-
-        _animator.SetFloat("DirectionSideways", directionSideways);
+        if (Animator) Animator.SetTrigger(param);
     }
-    public void SetJump()
-    {
-        if (_animator == null)
-        {
-            Debug.LogWarning("Animator is not assigned.");
-            return;
-        }
-
-        _animator.SetTrigger("Jump");
-    }
-    public void SetLand()
-    {
-        if (_animator == null)
-        {
-            Debug.LogWarning("Animator is not assigned.");
-            return;
-        }
-
-        _animator.SetTrigger("Land");
-    } 
 }
