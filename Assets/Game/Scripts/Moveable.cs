@@ -264,9 +264,15 @@ public class Moveable : MonoBehaviour
     }
     void Walk()
     {
-        var vector = new Vector3(lastMovementInput.x, 0, lastMovementInput.y).normalized;
-        rb.MovePosition(rb.position + vector * Time.deltaTime * activeSpeed);
+        var dir = new Vector3(lastMovementInput.x, 0, lastMovementInput.y).normalized;
+        var move = dir * Time.deltaTime * activeSpeed;
+        if (rb.SweepTest(dir, out RaycastHit hit, move.magnitude))
+        {
+            move = dir * hit.distance * 0.9f;
+        }
+        rb.MovePosition(rb.position + move);
     }
+
     #endregion
     #region Jump 
     void SetIsGrounded()
