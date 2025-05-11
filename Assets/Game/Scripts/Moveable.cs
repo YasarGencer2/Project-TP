@@ -23,6 +23,8 @@ public class Moveable : MonoBehaviour
     [SerializeField] bool canCheckGrounded = true;
     [SerializeField] bool holdingJump = false;
     [SerializeField] bool jumpInput = false;
+    [SerializeField] float jumpBufferTime = 0.1f;
+    [SerializeField] float jumpBufferCounter;
 
     [Space(2), Header("Wall Jump")]
     [SerializeField] float wallJumpForceUp = 5f;
@@ -134,6 +136,7 @@ public class Moveable : MonoBehaviour
     void JumpLogic()
     {
         SetIsGrounded();
+        CountJumpBuffer();
     }
     void WallLogic()
     {
@@ -292,15 +295,40 @@ public class Moveable : MonoBehaviour
             isJumping = false;
             isDoubleJumping = false;
             isHangingOnWall = false;
+            if (jumpBufferCounter > 0)  
+                Jump(true);
         }
     }
-    public void Jump()
+    void CountJumpBuffer()
+    {
+        if (jumpBufferCounter > 0)
+        {
+            jumpBufferCounter -= Time.deltaTime;
+        }
+    }
+    public void Jump(bool fromBuffer = false)
     {
         jumpInput = true;
         holdingJump = true;
-        var canJump = isHangingOnWall || (isGrounded = false || isDoubleJumping == false);
-        if (canJump == false)
+        if (isHangingOnWall)
             return;
+        if (fromBuffer == false)
+        {
+            var canJump = isGrounded = false || isDoubleJumping == false;
+            if (canJump == false)
+            {
+                jumpBufferCounter = jumpBufferTime;
+                return;
+            }
+            else
+            {
+                jumpBufferCounter = 0;
+            }
+        }
+        else
+        {
+            jumpBufferCounter = 0;
+        }
 
         if (isCrouching)
             CancelCrouch();
