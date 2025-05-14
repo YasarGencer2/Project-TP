@@ -1,6 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.ShaderGraph.Internal;
+using System.Collections; 
 using UnityEngine;
 
 [RequireComponent(typeof(MoveableAnimator)), RequireComponent(typeof(Rigidbody))]
@@ -170,6 +168,8 @@ public class Moveable : MonoBehaviour
         movementInput = InputManager.Instance.GetMovementInput();
         isWalking = movementInput.magnitude > 0;
         SetLastWalkInput();
+ 
+        moveableAnimator.SetFloat("X", Mathf.Clamp(Mathf.Round(movementInput.x), -1, 1)); 
     }
     void GetWallHangingMovementInput()
     {
