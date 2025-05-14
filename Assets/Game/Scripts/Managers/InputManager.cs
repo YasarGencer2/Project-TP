@@ -46,7 +46,9 @@ public class InputManager : MonoBehaviour
         inputActions.Enable();
 
         inputActions.FindAction("Player/Jump").performed += callBacks => JumpPerformed();
-        inputActions.FindAction("Player/Jump").canceled += callBacks => JumpCanceled(); 
+        inputActions.FindAction("Player/Jump").canceled += callBacks => JumpCanceled();
+        inputActions.FindAction("Player/Crouch").performed += callBacks => CrouchPerformed();
+        inputActions.FindAction("Player/Crouch").canceled += callBacks => CrouchCanceled();
 
     }
 
@@ -55,6 +57,8 @@ public class InputManager : MonoBehaviour
         inputActions.Disable();
         inputActions.FindAction("Player/Jump").performed -= callBacks => JumpPerformed();
         inputActions.FindAction("Player/Jump").canceled -= callBacks => JumpCanceled();
+        inputActions.FindAction("Player/Crouch").performed -= callBacks => CrouchPerformed();
+        inputActions.FindAction("Player/Crouch").canceled -= callBacks => CrouchCanceled();
     }
 
     public Vector2 GetMovementInput()
@@ -81,6 +85,20 @@ public class InputManager : MonoBehaviour
     {
         player.CancelJump();
     }
+    void CrouchPerformed()
+    {
+        var crouchAction = inputActions.FindAction("Player/Crouch");
+        var value = crouchAction.ReadValue<float>();
+        if (value == 0)
+            return;
+        var device = crouchAction.activeControl?.device;
+        SetInputMode(device);
+        player.Crouch();
+    }
+    void CrouchCanceled()
+    {
+        player.CancelCrouch();
+    }
     public bool GetCrouchInput()
     {
         var crouchAction = inputActions.FindAction("Player/Crouch");
@@ -90,7 +108,7 @@ public class InputManager : MonoBehaviour
         var device = crouchAction.activeControl?.device;
         SetInputMode(device);
         return true;
-    } 
+    }
     public Vector3 GetMousePosition()
     {
         var ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());

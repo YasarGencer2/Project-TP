@@ -1,4 +1,4 @@
-using System.Collections; 
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(MoveableAnimator)), RequireComponent(typeof(Rigidbody))]
@@ -52,6 +52,7 @@ public class Moveable : MonoBehaviour
     [SerializeField] float airSlideSpeed = 5f;
     [SerializeField] float airSlideSpeedLoseTime = 0.5f;
     [SerializeField] bool canAirSlide = true;
+    [SerializeField] float boostUpForce = 5f;
     Coroutine canAirSlideCoroutine;
 
 
@@ -168,8 +169,8 @@ public class Moveable : MonoBehaviour
         movementInput = InputManager.Instance.GetMovementInput();
         isWalking = movementInput.magnitude > 0;
         SetLastWalkInput();
- 
-        moveableAnimator.SetFloat("X", Mathf.Clamp(Mathf.Round(movementInput.x), -1, 1)); 
+
+        moveableAnimator.SetFloat("X", Mathf.Clamp(Mathf.Round(movementInput.x), -1, 1));
     }
     void GetWallHangingMovementInput()
     {
@@ -295,7 +296,7 @@ public class Moveable : MonoBehaviour
             isJumping = false;
             isDoubleJumping = false;
             isHangingOnWall = false;
-            if (jumpBufferCounter > 0)  
+            if (jumpBufferCounter > 0)
                 Jump(true);
         }
     }
@@ -309,7 +310,7 @@ public class Moveable : MonoBehaviour
     public void Jump(bool fromBuffer = false)
     {
         jumpInput = true;
-        holdingJump = true; 
+        holdingJump = true;
         if (fromBuffer == false)
         {
             var canJump = isHangingOnWall || (isGrounded = false || isDoubleJumping == false);
@@ -327,10 +328,7 @@ public class Moveable : MonoBehaviour
         {
             jumpBufferCounter = 0;
         }
-
-        if (isCrouching)
-            CancelCrouch();
-
+        CancelCrouch();
         if (isHangingOnWall)
         {
             WallJumpForce();
@@ -355,9 +353,11 @@ public class Moveable : MonoBehaviour
             StopCoroutine(canCheckHangingOnWallCoroutine);
         canCheckHangingOnWallCoroutine = StartCoroutine(SetCanCheckHanginOnWall(true));
     }
-    void JumpFroce()
+    void JumpFroce(float overridenForce = 0)
     {
+
         var force = isDoubleJumping ? doubleJumpForce : jumpForce;
+        force = overridenForce == 0 ? force : overridenForce;
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         rb.AddForce(Vector3.up * force, ForceMode.Impulse);
     }
@@ -450,9 +450,13 @@ public class Moveable : MonoBehaviour
     #region Crouch
     void GetCrouchInput()
     {
-        crouchInput = InputManager.Instance.GetCrouchInput();
-        if (crouchInput == false)
-            CancelCrouch();
+        // crouchInput = InputManager.Instance.GetCrouchInput();
+        // if (crouchInput == false)
+        //     CancelCrouch();
+    }
+    public void Crouch()
+    {
+        crouchInput = true; 
     }
     void HandleCrouch()
     {
@@ -484,8 +488,9 @@ public class Moveable : MonoBehaviour
         if (isCrouching == false)
             return;
     }
-    void CancelCrouch()
+    public void CancelCrouch()
     {
+        crouchInput = false;
         isCrouching = false;
         isSliding = false;
         isAirSliding = false;
@@ -523,6 +528,8 @@ public class Moveable : MonoBehaviour
             return;
         isAirSliding = true;
         activeSpeed = airSlideSpeed;
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+        JumpFroce(boostUpForce);
         if (canAirSlideCoroutine != null)
             StopCoroutine(canAirSlideCoroutine);
         canAirSlideCoroutine = StartCoroutine(SetCanAirSlide(true));
