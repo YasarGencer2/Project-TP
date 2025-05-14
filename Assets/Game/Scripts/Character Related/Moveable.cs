@@ -6,6 +6,7 @@ public class Moveable : MonoBehaviour
 {
     MoveableAnimator moveableAnimator;
     Rigidbody rb;
+    [SerializeField] Camera cam;
 
     [Header("Movement")]
     [SerializeField] float activeSpeed = 5f;
@@ -166,12 +167,21 @@ public class Moveable : MonoBehaviour
     {
         if (isHangingOnWall)
             return;
-        movementInput = InputManager.Instance.GetMovementInput();
+
+        var input = InputManager.Instance.GetMovementInput();
+        Vector3 dir = cam.transform.right * input.x + cam.transform.forward * input.y;
+        dir.y = 0;
+        movementInput = new Vector2(dir.x, dir.z);
+
         isWalking = movementInput.magnitude > 0;
         SetLastWalkInput();
 
-        moveableAnimator.SetFloat("X", Mathf.Clamp(Mathf.Round(movementInput.x), -1, 1));
+        moveableAnimator.SetFloat("X", Mathf.Clamp(Mathf.Round(input.x), -1, 1));
     }
+
+
+
+
     void GetWallHangingMovementInput()
     {
         if (isHangingOnWall == false)
@@ -456,7 +466,7 @@ public class Moveable : MonoBehaviour
     }
     public void Crouch()
     {
-        crouchInput = true; 
+        crouchInput = true;
     }
     void HandleCrouch()
     {
@@ -616,6 +626,12 @@ public class Moveable : MonoBehaviour
         {
             lookInput = lastLookInput;
         }
+        else
+        { 
+            Vector3 dir = cam.transform.right * lookInput.x + cam.transform.forward * lookInput.y;
+            dir.y = 0;
+            lookInput = new Vector2(dir.x, dir.z);
+        }
         lastLookInput = lookInput;
         lastLookTo = lookTo;
         lookTo = new Vector3(lookInput.x, 0, lookInput.y);
@@ -694,6 +710,8 @@ public class Moveable : MonoBehaviour
         RaycastHelper.DrawRay(transform, wallJumpGroundRayData);
         RaycastHelper.DrawRay(transform, ledgeBottomRayData);
         RaycastHelper.DrawRay(transform, ledgeTopRayData);
+
+        Debug.DrawRay(transform.position, movementInput * 5, Color.red);
     }
     #endregion
 }
