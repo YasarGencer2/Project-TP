@@ -539,11 +539,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 1193836996}
-  offset: {x: 0, y: 5, z: -6}
+  offset: {x: 0, y: 7, z: -7}
   rotateSpeed: 5
-  smoothTime: 0.1
+  smoothTime: 0.2
   minPitch: -40
-  maxPitch: 30
+  maxPitch: 40
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
