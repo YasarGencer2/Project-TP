@@ -186,16 +186,19 @@ public class Moveable : MonoBehaviour
     {
         if (isHangingOnWall == false)
             return;
-        var input = InputManager.Instance.GetMovementInput();
+        var input = InputManager.Instance.GetMovementInput(); 
+        Vector3 dir = cam.transform.right * input.x + cam.transform.forward * input.y;
+        dir.y = 0;
+        input = new Vector2(dir.x, dir.z);
         if (input.magnitude <= 0)
         {
             movementInput = input;
         }
         else
         {
-            var dir = new Vector3(input.x, 0, input.y).normalized;
+            var direction = new Vector3(input.x, 0, input.y).normalized;
             var wallDir = new Vector3(-wallDirection.x, 0, -wallDirection.z).normalized;
-            if (Vector3.Dot(dir, wallDir) > 0.9f)
+            if (Vector3.Dot(direction, wallDir) > 0.9f)
             {
                 movementInput = Vector2.zero;
             }
@@ -627,7 +630,7 @@ public class Moveable : MonoBehaviour
             lookInput = lastLookInput;
         }
         else
-        { 
+        {
             Vector3 dir = cam.transform.right * lookInput.x + cam.transform.forward * lookInput.y;
             dir.y = 0;
             lookInput = new Vector2(dir.x, dir.z);
