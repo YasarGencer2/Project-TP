@@ -372,6 +372,7 @@ public class Mover : MonoBehaviour
         var force = isDoubleJumping ? doubleJumpForce : jumpForce;
         force = overridenForce == 0 ? force : overridenForce;
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+        gravity = 0;
         rb.AddForce(Vector3.up * force, ForceMode.Impulse);
     }
     public void CancelJump()
