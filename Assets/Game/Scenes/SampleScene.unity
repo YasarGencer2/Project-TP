@@ -538,6 +538,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08c35cff3ffee426cb5978b369845a93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  camera: {fileID: 330585545}
   target: {fileID: 1193836996}
   offset: {x: 0, y: 7, z: -7}
   rotateSpeed: 5
@@ -1334,6 +1335,7 @@ GameObject:
   - component: {fileID: 1193837001}
   - component: {fileID: 1193836998}
   - component: {fileID: 1193836997}
+  - component: {fileID: 1193837002}
   - component: {fileID: 1193837000}
   - component: {fileID: 1193836999}
   m_Layer: 3
@@ -1371,7 +1373,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f470f9584ddd6422c96de335e55063e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cam: {fileID: 330585545}
   activeSpeed: 0
   minSpeed: 2
   midSpeed: 5
@@ -1552,7 +1553,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mover: {fileID: 1193836997}
+  fighter: {fileID: 1193837002}
   cameraController: {fileID: 330585548}
+--- !u!114 &1193837002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1193836995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04ba981725db044c3841ebe1137c0a55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1291816923
 GameObject:
   m_ObjectHideFlags: 0

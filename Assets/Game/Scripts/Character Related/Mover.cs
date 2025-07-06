@@ -1,13 +1,9 @@
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(MoveableAnimator)), RequireComponent(typeof(Rigidbody))]
-public class Mover : MonoBehaviour
+[RequireComponent(typeof(CharacterAnimator)), RequireComponent(typeof(Rigidbody))]
+public class Mover : CharacterComponent
 {
-    MoveableAnimator moveableAnimator;
-    Rigidbody rb;
-    [SerializeField] Camera cam;
-
     [Header("Movement")]
     [SerializeField] float activeSpeed = 5f;
     [SerializeField] float minSpeed = 2f, midSpeed = 5f, maxSpeed = 10f;
@@ -97,12 +93,6 @@ public class Mover : MonoBehaviour
     [SerializeField] Vector2 lookInput, lastLookInput;
     [SerializeField] Vector3 lookTo, lastLookTo;
     [SerializeField] float startLinearDamping;
-
-    void Awake()
-    {
-        moveableAnimator = GetComponent<MoveableAnimator>();
-        rb = GetComponent<Rigidbody>();
-    }
     void Start()
     {
         startLinearDamping = rb.linearDamping;
@@ -176,7 +166,7 @@ public class Mover : MonoBehaviour
         isWalking = movementInput.magnitude > 0;
         SetLastWalkInput();
 
-        moveableAnimator.SetFloat("X", Mathf.Clamp(Mathf.Round(input.x), -1, 1));
+        animator.SetFloat("X", Mathf.Clamp(Mathf.Round(input.x), -1, 1));
     }
 
 
@@ -354,7 +344,7 @@ public class Mover : MonoBehaviour
             VFXSystem.Instance.PLayVFX(VFXType.Jump, transform.position);
         }
 
-        moveableAnimator.SetTrigger("Jump");
+        animator.SetTrigger("Jump");
 
         isJumping = true;
         isGrounded = false;
@@ -522,7 +512,7 @@ public class Mover : MonoBehaviour
             StopCoroutine(canSlideCoroutine);
         canSlideCoroutine = StartCoroutine(SetCanSlide(true));
         canSlide = false;
-        moveableAnimator.SetTrigger("Slide");
+        animator.SetTrigger("Slide");
     }
     void Sliding()
     {
@@ -548,7 +538,7 @@ public class Mover : MonoBehaviour
             StopCoroutine(canAirSlideCoroutine);
         canAirSlideCoroutine = StartCoroutine(SetCanAirSlide(true));
         canAirSlide = false;
-        moveableAnimator.SetTrigger("AirSlide");
+        animator.SetTrigger("AirSlide");
     }
     void AirSliding()
     {
@@ -691,13 +681,13 @@ public class Mover : MonoBehaviour
     #region Animations
     void HandleAnimations()
     {
-        moveableAnimator.SetBool("isWalking", isWalking);
-        moveableAnimator.SetBool("isJumping", isJumping);
-        moveableAnimator.SetBool("isGrounded", isGrounded);
-        moveableAnimator.SetBool("isHanging", isHangingOnWall);
-        moveableAnimator.SetBool("isSliding", isSliding);
-        moveableAnimator.SetBool("isCrouching", isCrouching);
-        moveableAnimator.SetFloat("Speed", activeSpeed / maxSpeed);
+        animator.SetBool("isWalking", isWalking);
+        animator.SetBool("isJumping", isJumping);
+        animator.SetBool("isGrounded", isGrounded);
+        animator.SetBool("isHanging", isHangingOnWall);
+        animator.SetBool("isSliding", isSliding);
+        animator.SetBool("isCrouching", isCrouching);
+        animator.SetFloat("Speed", activeSpeed / maxSpeed);
     }
 
     #endregion

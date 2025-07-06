@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.iOS;
 
 public class InputManager : MonoBehaviour
 {
@@ -30,7 +31,7 @@ public class InputManager : MonoBehaviour
     }
     void SetInputMode(InputControl control)
     {
-        var value = control.device is Gamepad;
+        var value = !(control.device is not Gamepad);
         SetInputMode(value);
     }
     void SetInputMode(bool value)
@@ -45,20 +46,38 @@ public class InputManager : MonoBehaviour
     {
         inputActions.Enable();
 
-        inputActions.FindAction("Player/Jump").performed += callBacks => JumpPerformed();
-        inputActions.FindAction("Player/Jump").canceled += callBacks => JumpCanceled();
-        inputActions.FindAction("Player/Crouch").performed += callBacks => CrouchPerformed();
-        inputActions.FindAction("Player/Crouch").canceled += callBacks => CrouchCanceled();
+        var jump = inputActions.FindAction("Player/Jump");
+        var crouch = inputActions.FindAction("Player/Crouch");
+        var basicAttack = inputActions.FindAction("Player/BasicAttack");
 
+        jump.performed += callBacks => JumpPerformed();
+        jump.canceled += callBacks => JumpCanceled();
+        crouch.performed += callBacks => CrouchPerformed();
+        crouch.canceled += callBacks => CrouchCanceled();
+        basicAttack.performed += callBacks => BasicAttack();
+
+        jump.performed += callBacks => SetInputMode(jump.activeControl?.device);
+        crouch.performed += callBacks => SetInputMode(crouch.activeControl?.device);
+        basicAttack.performed += callBacks => SetInputMode(basicAttack.activeControl?.device);
     }
 
     private void OnDisable()
     {
         inputActions.Disable();
-        inputActions.FindAction("Player/Jump").performed -= callBacks => JumpPerformed();
-        inputActions.FindAction("Player/Jump").canceled -= callBacks => JumpCanceled();
-        inputActions.FindAction("Player/Crouch").performed -= callBacks => CrouchPerformed();
-        inputActions.FindAction("Player/Crouch").canceled -= callBacks => CrouchCanceled();
+
+        var jump = inputActions.FindAction("Player/Jump");
+        var crouch = inputActions.FindAction("Player/Crouch");
+        var basicAttack = inputActions.FindAction("Player/BasicAttack");
+
+        jump.performed -= callBacks => JumpPerformed();
+        jump.canceled -= callBacks => JumpCanceled();
+        crouch.performed -= callBacks => CrouchPerformed();
+        crouch.canceled -= callBacks => CrouchCanceled();
+        basicAttack.performed -= callBacks => BasicAttack();
+        
+        jump.performed -= callBacks => SetInputMode(jump.activeControl?.device);
+        crouch.performed -= callBacks => SetInputMode(crouch.activeControl?.device);
+        basicAttack.performed -= callBacks => SetInputMode(basicAttack.activeControl?.device);
     }
 
     public Vector2 GetMovementInput()
@@ -72,13 +91,7 @@ public class InputManager : MonoBehaviour
     }
 
     void JumpPerformed()
-    {
-        var jumpAction = inputActions.FindAction("Player/Jump");
-        var value = jumpAction.ReadValue<float>();
-        if (value == 0)
-            return;
-        var device = jumpAction.activeControl?.device;
-        SetInputMode(device);
+    { 
         player.Mover.Jump();
     }
     void JumpCanceled()
@@ -86,28 +99,16 @@ public class InputManager : MonoBehaviour
         player.Mover.CancelJump();
     }
     void CrouchPerformed()
-    {
-        var crouchAction = inputActions.FindAction("Player/Crouch");
-        var value = crouchAction.ReadValue<float>();
-        if (value == 0)
-            return;
-        var device = crouchAction.activeControl?.device;
-        SetInputMode(device);
+    { 
         player.Mover.Crouch();
     }
     void CrouchCanceled()
     {
         player.Mover.CancelCrouch();
     }
-    public bool GetCrouchInput()
-    {
-        var crouchAction = inputActions.FindAction("Player/Crouch");
-        var value = crouchAction.ReadValue<float>();
-        if (value == 0)
-            return false;
-        var device = crouchAction.activeControl?.device;
-        SetInputMode(device);
-        return true;
+    void BasicAttack()
+    { 
+        player.Fighter.Attack(AttackTypes.BasicHit);
     }
     public Vector3 GetMousePosition()
     {
