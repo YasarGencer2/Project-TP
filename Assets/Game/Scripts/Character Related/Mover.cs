@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(MoveableAnimator)), RequireComponent(typeof(Rigidbody))]
-public class Moveable : MonoBehaviour
+public class Mover : MonoBehaviour
 {
     MoveableAnimator moveableAnimator;
     Rigidbody rb;
@@ -186,7 +186,7 @@ public class Moveable : MonoBehaviour
     {
         if (isHangingOnWall == false)
             return;
-        var input = InputManager.Instance.GetMovementInput(); 
+        var input = InputManager.Instance.GetMovementInput();
         Vector3 dir = cam.transform.right * input.x + cam.transform.forward * input.y;
         dir.y = 0;
         input = new Vector2(dir.x, dir.z);
@@ -600,19 +600,15 @@ public class Moveable : MonoBehaviour
     }
     void GetRotationOnKeyboardAndMouse()
     {
-        // var mousePos = InputManager.Instance.GetMousePosition();
-        // lastLookTo = lookTo;
-        // lookTo = mousePos - transform.position;
-        // lookTo.Normalize();
-        // lookTo.y = 0; 
-        if (movementInput != Vector2.zero)
-        {
-            lookInput = movementInput;
-        }
-        else
-        {
-            lookInput = lastLookInput;
-        }
+        lookInput = movementInput;
+        // if (movementInput != Vector2.zero)
+        // {
+        //     lookInput = movementInput;
+        // }
+        // else
+        // {
+        //     lookInput = lastLookInput;
+        // }
         lastLookInput = lookInput;
         lastLookTo = lookTo;
         lookTo = new Vector3(lookInput.x, 0, lookInput.y);
@@ -620,21 +616,22 @@ public class Moveable : MonoBehaviour
     }
     void GetRotationOnGamepad()
     {
-        lookInput = InputManager.Instance.GetLookInput();
-        if (lookInput == Vector2.zero && movementInput != Vector2.zero)
-        {
-            lookInput = movementInput;
-        }
-        else if (lookInput == Vector2.zero && lastMovementInput == Vector2.zero)
-        {
-            lookInput = lastLookInput;
-        }
-        else
-        {
-            Vector3 dir = cam.transform.right * lookInput.x + cam.transform.forward * lookInput.y;
-            dir.y = 0;
-            lookInput = new Vector2(dir.x, dir.z);
-        }
+        lookInput = movementInput;
+        // lookInput = InputManager.Instance.GetLookInput();
+        // if (lookInput == Vector2.zero && movementInput != Vector2.zero)
+        // {
+        // lookInput = movementInput;
+        // }
+        // else if (lookInput == Vector2.zero && lastMovementInput == Vector2.zero)
+        // {
+        //     lookInput = lastLookInput;
+        // }
+        // else
+        // {
+        //     Vector3 dir = cam.transform.right * lookInput.x + cam.transform.forward * lookInput.y;
+        //     dir.y = 0;
+        //     lookInput = new Vector2(dir.x, dir.z);
+        // }
         lastLookInput = lookInput;
         lastLookTo = lookTo;
         lookTo = new Vector3(lookInput.x, 0, lookInput.y);

@@ -6,7 +6,7 @@ public class InputManager : MonoBehaviour
 {
     public static InputManager Instance { get; private set; }
     [SerializeField] InputActionAsset inputActions;
-    [SerializeField] Moveable player;
+    [SerializeField] CharacterController player;
     [SerializeField] LayerMask playerLayerMask;
 
     [SerializeField] bool onGamepad;
@@ -79,11 +79,11 @@ public class InputManager : MonoBehaviour
             return;
         var device = jumpAction.activeControl?.device;
         SetInputMode(device);
-        player.Jump();
+        player.Mover.Jump();
     }
     void JumpCanceled()
     {
-        player.CancelJump();
+        player.Mover.CancelJump();
     }
     void CrouchPerformed()
     {
@@ -93,11 +93,11 @@ public class InputManager : MonoBehaviour
             return;
         var device = crouchAction.activeControl?.device;
         SetInputMode(device);
-        player.Crouch();
+        player.Mover.Crouch();
     }
     void CrouchCanceled()
     {
-        player.CancelCrouch();
+        player.Mover.CancelCrouch();
     }
     public bool GetCrouchInput()
     {
