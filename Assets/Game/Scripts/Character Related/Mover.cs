@@ -66,16 +66,16 @@ public class Mover : CharacterComponent
     [SerializeField] float rotationSmoothTime = 0.1f;
 
 
-    [Space(5), Header("Status")]
-    [SerializeField] bool isWalking;
-    [SerializeField] bool isJumping;
-    [SerializeField] bool isDoubleJumping;
-    [SerializeField] bool isGrounded;
-    [SerializeField] bool isHangingOnWall;
-    [SerializeField] bool isWallJumping;
-    [SerializeField] bool isCrouching;
-    [SerializeField] bool isSliding;
-    [SerializeField] bool isAirSliding;
+    // [Space(5), Header("Status")]
+    public bool isWalking;
+    public bool isJumping;
+    public bool isDoubleJumping;
+    public bool isGrounded;
+    public bool isHangingOnWall;
+    public bool isWallJumping;
+    public bool isCrouching;
+    public bool isSliding;
+    public bool isAirSliding;
 
     [Space(10), Header("Debug")]
     [Space(0), Header("Ray Datas")]
@@ -153,11 +153,23 @@ public class Mover : CharacterComponent
     }
 
     #region Walk
+    bool SetCantMoveByAttack()
+    {
+        if (CharacterController.Fighter.CanMove == false)
+        {
+            movementInput = Vector2.zero;
+            isWalking = false;
+            lastMovementInput = Vector2.zero;
+            animator.SetFloat("X", 0);
+            return true;
+        }
+        return false;
+    }
     void GetWalkInput()
     {
+        SetCantMoveByAttack();
         if (isHangingOnWall)
             return;
-
         var input = InputManager.Instance.GetMovementInput();
         Vector3 dir = cam.transform.right * input.x + cam.transform.forward * input.y;
         dir.y = 0;
@@ -174,6 +186,7 @@ public class Mover : CharacterComponent
 
     void GetWallHangingMovementInput()
     {
+        SetCantMoveByAttack();
         if (isHangingOnWall == false)
             return;
         var input = InputManager.Instance.GetMovementInput();
@@ -281,7 +294,7 @@ public class Mover : CharacterComponent
     }
 
     #endregion
-    #region Jump 
+    #region Jump  
     void SetIsGrounded()
     {
         if (canCheckGrounded == false)
@@ -310,27 +323,23 @@ public class Mover : CharacterComponent
             jumpBufferCounter -= Time.deltaTime;
         }
     }
+    void HandleJumpBuffer(bool canJump, bool fromBuffer)
+    {
+        if (fromBuffer == false)
+            if (canJump == false)
+                jumpBufferCounter = jumpBufferTime;
+        jumpBufferCounter = 0;
+    }
     public void Jump(bool fromBuffer = false)
     {
+        var canJump = isHangingOnWall || isGrounded;
+        if (canJump == false)
+            return;
+        if (CharacterController.Fighter.CanJump == false)
+            return;
+        HandleJumpBuffer(canJump, fromBuffer);
         jumpInput = true;
         holdingJump = true;
-        if (fromBuffer == false)
-        {
-            var canJump = isHangingOnWall || (isGrounded = false || isDoubleJumping == false);
-            if (canJump == false)
-            {
-                jumpBufferCounter = jumpBufferTime;
-                return;
-            }
-            else
-            {
-                jumpBufferCounter = 0;
-            }
-        }
-        else
-        {
-            jumpBufferCounter = 0;
-        }
         CancelCrouch();
         if (isHangingOnWall)
         {
@@ -464,6 +473,11 @@ public class Mover : CharacterComponent
     }
     void HandleCrouch()
     {
+        if (CharacterController.Fighter.CanSlide == false)
+        {
+            crouchInput = false;
+            return;
+        }
         if (crouchInput == false)
             return;
         if (isHangingOnWall)
@@ -573,8 +587,22 @@ public class Mover : CharacterComponent
     }
     #endregion
     #region Look
+    bool SetCanLookByAttack()
+    {
+        if (CharacterController.Fighter.CanRotate == false)
+        {
+            lookInput = Vector2.zero;
+            lookTo = Vector3.zero;
+            lastLookInput = Vector2.zero;
+            lastLookTo = Vector3.zero;
+            return true;
+        }
+        return false;
+    }
     void GetLookInput()
     {
+        if (SetCanLookByAttack())
+            return;
         if (isHangingOnWall)
         {
             GetRotationOnWall();

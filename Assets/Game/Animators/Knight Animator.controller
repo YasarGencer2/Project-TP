@@ -373,7 +373,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Slash 1
-  m_Speed: 1
+  m_Speed: 1.2
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: -6738642158337573053}
@@ -504,9 +504,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0
+  m_TransitionDuration: 0.046883162
   m_TransitionOffset: 0
-  m_ExitTime: 0
+  m_ExitTime: 0.0000000040945105
   m_HasExitTime: 0
   m_HasFixedDuration: 0
   m_InterruptionSource: 0

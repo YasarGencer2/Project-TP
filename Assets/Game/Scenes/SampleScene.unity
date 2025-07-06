@@ -1567,6 +1567,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04ba981725db044c3841ebe1137c0a55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  attackData:
+    Name: a
+    CanUseOnAir: 0
+    CanUseOnGround: 1
+    StopMovingFor: 0.8
+    StopJumpingFor: 0.8
+    StopRotatingFor: 0.8
+    StopSlidingFor: 0.8
+    StopAttackingFor: 0.8
 --- !u!1 &1291816923
 GameObject:
   m_ObjectHideFlags: 0
