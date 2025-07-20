@@ -730,7 +730,7 @@ public class Mover : CharacterComponent
         RaycastHelper.DrawRay(transform, ledgeBottomRayData);
         RaycastHelper.DrawRay(transform, ledgeTopRayData);
 
-        Debug.DrawRay(transform.position, movementInput * 5, Color.red);
+        // Debug.DrawRay(transform.position, movementInput * 5, Color.red);
     }
     #endregion
 }
